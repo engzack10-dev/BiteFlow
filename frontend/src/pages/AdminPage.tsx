@@ -15,7 +15,7 @@ import type {
 } from '../types/index.js'
 import { api } from '../api/client.js'
 import { UnauthorizedBanner } from '../components/admin/UnauthorizedBanner.js'
-import { AdminTabNav, type AdminSubTab } from '../components/admin/AdminTabNav.js'
+import { type AdminSubTab } from '../components/admin/AdminTabNav.js'
 import { AdminDashboardView } from '../components/admin/AdminDashboardView.js'
 import { AdminProductsTable } from '../components/admin/AdminProductsTable.js'
 import { AdminCategoriesTable } from '../components/admin/AdminCategoriesTable.js'
@@ -27,6 +27,21 @@ import { AdminCustomersTable } from '../components/admin/AdminCustomersTable.js'
 import { AdminReportsView } from '../components/admin/AdminReportsView.js'
 import { AdminFeedbackTable } from '../components/admin/AdminFeedbackTable.js'
 import { AdminSettingsView } from '../components/admin/AdminSettingsView.js'
+import { ThemeToggle } from '../components/common/ThemeToggle.js'
+import {
+  DashboardIcon,
+  OrdersIcon,
+  DeliveryIcon,
+  PaymentsIcon,
+  ProductsIcon,
+  CategoriesIcon,
+  CustomersIcon,
+  ReportsIcon,
+  FeedbackIcon,
+  SettingsIcon,
+  UsersIcon,
+  BellIcon,
+} from '../components/common/AdminIcons.js'
 
 interface AdminPageProps {
   isLoadingAdmin: boolean
@@ -101,6 +116,10 @@ export function AdminPage({
   showToast,
   onSettingsUpdated,
 }: AdminPageProps) {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+
   // Customers State
   const [customers, setCustomers] = useState<CustomerRecord[]>([])
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(false)
@@ -190,6 +209,7 @@ export function AdminPage({
     (orders || []).filter((o) => ['CONFIRMED', 'PREPARING', 'READY', 'DISPATCHED'].includes(o?.status)).length
   const readyForDeliveryCount = (orders || []).filter((o) => o?.status === 'READY').length
   const pendingFeedbackCount = (feedback || []).filter((f) => f?.status === 'PENDING').length
+  const totalNotifications = pendingPaymentsCount + pendingFeedbackCount
 
   const handleRefreshAll = () => {
     onRefreshOrders()
@@ -197,59 +217,258 @@ export function AdminPage({
     void loadCustomers()
     void loadFeedback()
     if (onRetryAdmin) onRetryAdmin()
+    showToast('Dashboard data refreshed')
   }
 
-  return (
-    <div className="admin-portal">
-      {/* Top Header */}
-      <div className="admin-header">
-        <div>
-          <span className="customer-orders-subtitle">Restaurant Operations</span>
-          <h1 className="admin-title">BiteFlow Admin Portal</h1>
-          <p style={{ color: 'var(--text-muted, #6b7280)', marginTop: '0.25rem', fontSize: '0.9rem' }}>
-            Unified management for orders, kitchen, delivery, payments, catalog, customers, reports, and settings.
-          </p>
-        </div>
-        <button
-          type="button"
-          className="btn-action btn-continue"
-          onClick={onReturnToStorefront}
-          title="Return to customer storefront"
-        >
-          &larr; Return to Storefront
-        </button>
-      </div>
+  const handleGlobalSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!searchQuery.trim()) return
+    const q = searchQuery.trim()
+    if (adminSubTab === 'orders') {
+      onRefreshOrders({ search: q })
+    } else if (adminSubTab === 'customers') {
+      void loadCustomers(q)
+    } else if (adminSubTab === 'feedback') {
+      void loadFeedback(undefined, q)
+    } else {
+      // Default to orders search
+      onSelectSubTab('orders')
+      onRefreshOrders({ search: q })
+    }
+  }
 
-      {isLoadingAdmin ? (
-        <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-          <div className="spinner-large" style={{ margin: '0 auto 1rem' }} />
-          <p style={{ color: '#6b7280', fontSize: '1.1rem' }}>
-            Verifying administrative security credentials...
-          </p>
-        </div>
-      ) : adminError ? (
+  // Sidebar navigation sections matching Metis reference
+  const navSections: Array<{
+    title: string
+    items: Array<{
+      id: AdminSubTab
+      label: string
+      icon: React.ReactNode
+      badge?: number
+      badgeColor?: string
+    }>
+  }> = [
+    {
+      title: 'OPERATIONAL COMMAND',
+      items: [
+        { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon size={18} /> },
+        { id: 'orders', label: 'Orders', icon: <OrdersIcon size={18} />, badge: activeOrdersCount, badgeColor: '#2563eb' },
+        { id: 'delivery', label: 'Delivery Queue', icon: <DeliveryIcon size={18} />, badge: readyForDeliveryCount, badgeColor: '#059669' },
+        { id: 'payments', label: 'Payments', icon: <PaymentsIcon size={18} />, badge: pendingPaymentsCount, badgeColor: '#f59e0b' },
+      ],
+    },
+    {
+      title: 'MENU & AUDIT',
+      items: [
+        { id: 'products', label: 'Menu Dishes', icon: <ProductsIcon size={18} />, badge: products.length },
+        { id: 'categories', label: 'Categories', icon: <CategoriesIcon size={18} />, badge: categories.length },
+        { id: 'customers', label: 'Customers', icon: <CustomersIcon size={18} />, badge: customers.length || adminStats?.totalCustomers },
+        { id: 'reports', label: 'Reports & Audits', icon: <ReportsIcon size={18} /> },
+        { id: 'feedback', label: 'Feedback Inquiries', icon: <FeedbackIcon size={18} />, badge: pendingFeedbackCount, badgeColor: '#e11d48' },
+      ],
+    },
+    {
+      title: 'ADMINISTRATION',
+      items: [
+        { id: 'settings', label: 'Restaurant Settings', icon: <SettingsIcon size={18} /> },
+        { id: 'users', label: 'Staff & Roles', icon: <UsersIcon size={18} /> },
+      ],
+    },
+  ]
+
+  if (isLoadingAdmin) {
+    return (
+      <div className="metis-loading-screen">
+        <div className="spinner-large" />
+        <h2>Verifying Admin Authorization</h2>
+        <p>Loading secure back-office command center...</p>
+      </div>
+    )
+  }
+
+  if (adminError) {
+    return (
+      <div className="metis-error-screen">
         <UnauthorizedBanner
           adminError={adminError}
           userRole={userRole}
           onReturnToCart={onReturnToStorefront}
           onRetry={onRetryAdmin}
         />
-      ) : (
-        <>
-          {/* Unified 10-Area Navigation Bar */}
-          <AdminTabNav
-            activeSubTab={adminSubTab}
-            onSelectSubTab={onSelectSubTab}
-            productsCount={products.length}
-            categoriesCount={categories.length}
-            pendingPaymentsCount={pendingPaymentsCount}
-            activeOrdersCount={activeOrdersCount}
-            readyForDeliveryCount={readyForDeliveryCount}
-            pendingFeedbackCount={pendingFeedbackCount}
-            customersCount={customers.length || adminStats?.totalCustomers || 0}
-          />
+      </div>
+    )
+  }
 
-          {/* 1. Dashboard View */}
+  return (
+    <div className={`metis-admin-layout ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      {/* 1. LEFT SIDEBAR */}
+      <aside className={`metis-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+        {/* Brand Header */}
+        <div className="metis-sidebar-brand">
+          <div className="metis-brand-content" onClick={onReturnToStorefront} title="BiteFlow Home">
+            <img src="/Bitelogo.png" alt="BiteFlow" className="metis-logo-img" />
+            {!isSidebarCollapsed && (
+              <div className="metis-brand-text">
+                <span className="metis-brand-title">BiteFlow</span>
+                <span className="metis-brand-badge">ADMIN</span>
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            className="metis-collapse-toggle"
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label="Toggle sidebar width"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Navigation Sections */}
+        <div className="metis-sidebar-nav">
+          {navSections.map((sec) => (
+            <div key={sec.title} className="metis-nav-section">
+              {!isSidebarCollapsed && <div className="metis-nav-section-title">{sec.title}</div>}
+              {sec.items.map((item) => {
+                const isActive = adminSubTab === item.id
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`metis-nav-item ${isActive ? 'active' : ''}`}
+                    onClick={() => {
+                      onSelectSubTab(item.id)
+                      setIsMobileMenuOpen(false)
+                    }}
+                    title={item.label}
+                  >
+                    <span className="metis-nav-icon">{item.icon}</span>
+                    {!isSidebarCollapsed && <span className="metis-nav-label">{item.label}</span>}
+                    {!isSidebarCollapsed && item.badge !== undefined && item.badge > 0 && (
+                      <span
+                        className="metis-nav-badge"
+                        style={{ backgroundColor: item.badgeColor || 'var(--btn-yellow, #f59e0b)' }}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom Storefront Action */}
+        <div className="metis-sidebar-footer">
+          <button
+            type="button"
+            className="metis-return-storefront-btn"
+            onClick={onReturnToStorefront}
+            title="Return to customer ordering storefront"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            {!isSidebarCollapsed && <span>View Storefront</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* Mobile Backdrop */}
+      {isMobileMenuOpen && (
+        <div className="metis-mobile-backdrop" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
+
+      {/* 2. MAIN APP CANVAS */}
+      <div className="metis-main-container">
+        {/* Top Management Header Bar */}
+        <header className="metis-topbar">
+          <div className="metis-topbar-left">
+            <button
+              type="button"
+              className="metis-mobile-hamburger"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open mobile navigation menu"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+
+            {/* Global Spotlight Search */}
+            <form className="metis-search-form" onSubmit={handleGlobalSearch}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search orders, customers, dishes... (Enter to filter)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="metis-search-input"
+              />
+            </form>
+          </div>
+
+          <div className="metis-topbar-right">
+            {/* Quick Action: New Dish Shortcut */}
+            <button
+              type="button"
+              className="metis-action-btn-primary"
+              onClick={onAddProduct}
+              title="Add a new dish to restaurant menu"
+            >
+              <span>+ New Dish</span>
+            </button>
+
+            {/* Refresh Data */}
+            <button
+              type="button"
+              className="metis-icon-action"
+              onClick={handleRefreshAll}
+              title="Refresh all real-time operational data"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+              </svg>
+            </button>
+
+            {/* Dark / Light Theme Toggle */}
+            <div className="metis-theme-wrapper" title="Toggle Light / Dark Mode">
+              <ThemeToggle />
+            </div>
+
+            {/* Notification Bell with Badge */}
+            <div
+              className="metis-icon-action metis-bell-wrapper"
+              onClick={() => onSelectSubTab(pendingPaymentsCount > 0 ? 'payments' : 'orders')}
+              title={`${totalNotifications} items requiring admin attention`}
+            >
+              <BellIcon size={18} />
+              {totalNotifications > 0 && <span className="metis-bell-badge">{totalNotifications}</span>}
+            </div>
+
+            {/* Admin Profile Pill */}
+            <div className="metis-profile-pill">
+              <div className="metis-avatar">A</div>
+              <div className="metis-profile-info">
+                <span className="metis-profile-name">Restaurant Admin</span>
+                <span className="metis-profile-role">Manager</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Sub-view Content Canvas */}
+        <main className="metis-canvas-body">
           {adminSubTab === 'dashboard' && (
             <AdminDashboardView
               stats={adminStats}
@@ -265,7 +484,6 @@ export function AdminPage({
             />
           )}
 
-          {/* 2. Orders Management View */}
           {adminSubTab === 'orders' && (
             <AdminOrdersTable
               orders={orders}
@@ -277,18 +495,16 @@ export function AdminPage({
             />
           )}
 
-          {/* 3. Delivery Management View */}
           {adminSubTab === 'delivery' && (
             <AdminDeliveryView
               orders={orders}
               isLoading={isLoadingOrders}
               onUpdateStatus={onUpdateOrderStatus}
               onInspectOrder={onInspectOrder}
-              onRefresh={onRefreshOrders}
+              onRefresh={() => onRefreshOrders()}
             />
           )}
 
-          {/* 4. Payments Queue View */}
           {adminSubTab === 'payments' && (
             <AdminPaymentsTable
               payments={payments}
@@ -300,7 +516,6 @@ export function AdminPage({
             />
           )}
 
-          {/* 5. Products Management View */}
           {adminSubTab === 'products' && (
             <AdminProductsTable
               products={products}
@@ -311,7 +526,6 @@ export function AdminPage({
             />
           )}
 
-          {/* 6. Categories Management View */}
           {adminSubTab === 'categories' && (
             <AdminCategoriesTable
               categories={categories}
@@ -321,7 +535,6 @@ export function AdminPage({
             />
           )}
 
-          {/* 7. Customers Directory View */}
           {adminSubTab === 'customers' && (
             <AdminCustomersTable
               customers={customers}
@@ -332,22 +545,17 @@ export function AdminPage({
             />
           )}
 
-          {/* 8. Reports & Sales Performance View */}
-          {adminSubTab === 'reports' && (
-            <AdminReportsView getToken={getToken} />
-          )}
+          {adminSubTab === 'reports' && <AdminReportsView getToken={getToken} />}
 
-          {/* 9. Feedback & Inquiries View */}
           {adminSubTab === 'feedback' && (
             <AdminFeedbackTable
               feedback={feedback}
               isLoading={isLoadingFeedback}
-              onUpdateStatus={handleUpdateFeedbackStatus}
               onRefresh={loadFeedback}
+              onUpdateStatus={handleUpdateFeedbackStatus}
             />
           )}
 
-          {/* 10. Restaurant Settings View */}
           {adminSubTab === 'settings' && (
             <AdminSettingsView
               getToken={getToken}
@@ -356,15 +564,14 @@ export function AdminPage({
             />
           )}
 
-          {/* Secondary: User Roles Administration */}
           {adminSubTab === 'users' && (
             <AdminUsersTable
               users={adminUsers}
               onRoleChange={onRoleChange}
             />
           )}
-        </>
-      )}
+        </main>
+      </div>
     </div>
   )
 }

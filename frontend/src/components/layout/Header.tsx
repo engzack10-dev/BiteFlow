@@ -155,10 +155,12 @@ export function Header({
         {/* Admin Navigation for authorized Admin users only */}
         {isAuthorizedAdmin && (
           <button
+            type="button"
             className={`header-admin-btn ${activeTab === 'admin' ? 'active' : ''}`}
             onClick={() => onTabChange('admin')}
+            title="Open dedicated Admin Command Center"
           >
-            Admin Portal
+            🛡️ Admin Portal
           </button>
         )}
 

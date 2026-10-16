@@ -45,9 +45,45 @@ import { ContactPage } from './pages/ContactPage.js'
 import type { AdminSubTab } from './components/admin/AdminTabNav.js'
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<NavTab>('home')
+  const [activeTab, setActiveTab] = useState<NavTab>(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.toLowerCase().startsWith('/admin')) {
+      return 'admin'
+    }
+    return 'home'
+  })
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false)
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
+
+  // Synchronize browser URL with activeTab (dedicated /admin route)
+  const handleTabChange = useCallback((tab: NavTab) => {
+    setActiveTab(tab)
+    if (typeof window !== 'undefined') {
+      if (tab === 'admin') {
+        if (window.location.pathname !== '/admin') {
+          window.history.pushState(null, '', '/admin')
+        }
+      } else {
+        if (window.location.pathname === '/admin') {
+          window.history.pushState(null, '', '/')
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    }
+  }, [])
+
+  // Listen to browser Back/Forward navigation
+  useEffect(() => {
+    const onPopState = () => {
+      const isAdmin = window.location.pathname.toLowerCase().startsWith('/admin')
+      if (isAdmin) {
+        setActiveTab('admin')
+      } else {
+        setActiveTab((prev) => (prev === 'admin' ? 'home' : prev))
+      }
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
 
   // Custom Toast Hook
   const { toastMessage, showToast } = useToast()
@@ -527,6 +563,130 @@ export default function App() {
     }
   }
 
+  if (activeTab === 'admin') {
+    return (
+      <div className="admin-app-root">
+        <AdminPage
+          isLoadingAdmin={isLoadingAdmin}
+          adminError={adminError}
+          userRole={userProfile?.role}
+          adminStats={adminStats}
+          categories={categories}
+          products={products}
+          adminUsers={adminUsers}
+          adminSubTab={adminSubTab}
+          onSelectSubTab={setAdminSubTab}
+          onReturnToStorefront={() => handleTabChange('home')}
+          onAddProduct={openCreateProduct}
+          onToggleProductAvailability={handleToggleProductAvailability}
+          onEditProduct={openEditProduct}
+          onDeleteProduct={confirmDeleteProduct}
+          onAddCategory={openCreateCategory}
+          onEditCategory={openEditCategory}
+          onDeleteCategory={confirmDeleteCategory}
+          onRoleChange={handleRoleChange}
+          payments={payments}
+          isLoadingPayments={isLoadingPayments}
+          onVerifyPayment={(p) => setSelectedVerifyPayment(p)}
+          onRejectPayment={(p) => setSelectedRejectPayment(p)}
+          onViewAudit={(p) => setSelectedAuditPayment(p)}
+          onRefreshPayments={loadPayments}
+          orders={adminOrders}
+          orderCounts={adminOrderCounts}
+          isLoadingOrders={isLoadingOrders}
+          onUpdateOrderStatus={handleUpdateOrderStatus}
+          onInspectOrder={(o) => setSelectedInspectOrder(o)}
+          onRefreshOrders={loadAdminOrders}
+          onRetryAdmin={handleRetryAdmin}
+          getToken={getToken}
+          showToast={showToast}
+          onSettingsUpdated={(newSettings) => setRestaurantSettings(newSettings)}
+        />
+
+        {/* Toast Notification */}
+        <Toast message={toastMessage} />
+
+        {/* Admin: Category Form Modal */}
+        <CategoryModal
+          isOpen={showCategoryModal}
+          onClose={() => setShowCategoryModal(false)}
+          editingCategory={editingCategory}
+          categoryName={categoryName}
+          setCategoryName={setCategoryName}
+          categoryDesc={categoryDesc}
+          setCategoryDesc={setCategoryDesc}
+          categoryActive={categoryActive}
+          setCategoryActive={setCategoryActive}
+          onSubmit={handleSaveCategory}
+        />
+
+        {/* Admin: Product Form Modal */}
+        <ProductModal
+          isOpen={showProductModal}
+          onClose={() => setShowProductModal(false)}
+          editingProduct={editingProduct}
+          categories={categories}
+          productName={productName}
+          setProductName={setProductName}
+          productDesc={productDesc}
+          setProductDesc={setProductDesc}
+          productPrice={productPrice}
+          setProductPrice={setProductPrice}
+          productImage={productImage}
+          setProductImage={setProductImage}
+          productCategoryId={productCategoryId}
+          setProductCategoryId={setProductCategoryId}
+          productAvailable={productAvailable}
+          setProductAvailable={setProductAvailable}
+          onSubmit={handleSaveProduct}
+        />
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirm && (
+          <DeleteConfirmModal
+            type={deleteConfirm.type}
+            name={deleteConfirm.name}
+            onCancel={() => setDeleteConfirm(null)}
+            onConfirm={executeDelete}
+          />
+        )}
+
+        {/* Admin: Verify Payment Modal (FS-06) */}
+        <VerifyPaymentModal
+          isOpen={!!selectedVerifyPayment}
+          onClose={() => setSelectedVerifyPayment(null)}
+          payment={selectedVerifyPayment}
+          onConfirmVerify={handleConfirmVerifyPayment}
+          isSubmitting={isSubmittingPaymentAction}
+        />
+
+        {/* Admin: Reject Payment Modal (FS-06) */}
+        <RejectPaymentModal
+          isOpen={!!selectedRejectPayment}
+          onClose={() => setSelectedRejectPayment(null)}
+          payment={selectedRejectPayment}
+          onConfirmReject={handleConfirmRejectPayment}
+          isSubmitting={isSubmittingPaymentAction}
+        />
+
+        {/* Admin: Payment Audit History Modal (FS-06) */}
+        <PaymentAuditModal
+          isOpen={!!selectedAuditPayment}
+          onClose={() => setSelectedAuditPayment(null)}
+          payment={selectedAuditPayment}
+        />
+
+        {/* Admin: Order Details & Lifecycle Modal (FS-07) */}
+        <AdminOrderDetailsModal
+          isOpen={!!selectedInspectOrder}
+          onClose={() => setSelectedInspectOrder(null)}
+          order={selectedInspectOrder}
+          onUpdateStatus={handleUpdateOrderStatus}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="app-layout">
       {/* Navigation Header */}
@@ -534,12 +694,12 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={(tab) => {
           if (tab === 'orders') setTrackingOrderId(null)
-          setActiveTab(tab)
+          handleTabChange(tab)
         }}
         onOpenCart={() => setIsCartDrawerOpen(true)}
         onOpenOrders={() => {
           setTrackingOrderId(null)
-          setActiveTab('orders')
+          handleTabChange('orders')
         }}
         userProfile={userProfile}
         totalItemCount={totalUnitCount}
@@ -556,7 +716,7 @@ export default function App() {
             menuError={menuError}
             refreshMenu={refreshMenu}
             onAddToCart={addProductToCart}
-            onNavigateToMenu={() => setActiveTab('menu')}
+            onNavigateToMenu={() => handleTabChange('menu')}
             showHero={true}
           />
         ) : activeTab === 'menu' ? (
@@ -567,7 +727,7 @@ export default function App() {
             menuError={menuError}
             refreshMenu={refreshMenu}
             onAddToCart={addProductToCart}
-            onNavigateToMenu={() => setActiveTab('menu')}
+            onNavigateToMenu={() => handleTabChange('menu')}
             showHero={false}
           />
         ) : activeTab === 'cart' ? (
@@ -578,50 +738,11 @@ export default function App() {
               hasUnavailableItems={hasUnavailableItems}
               onUpdateQuantity={updateQuantity}
               onRemoveItem={removeItem}
-              onBrowseMenu={() => setActiveTab('menu')}
+              onBrowseMenu={() => handleTabChange('menu')}
               onUpdateCart={handleUpdateCart}
               onCheckout={() => {
                 setShowCheckoutModal(true)
               }}
-            />
-          </div>
-        ) : activeTab === 'admin' ? (
-          <div className="admin-page-wrapper">
-            <AdminPage
-              isLoadingAdmin={isLoadingAdmin}
-              adminError={adminError}
-              userRole={userProfile?.role}
-              adminStats={adminStats}
-              categories={categories}
-              products={products}
-              adminUsers={adminUsers}
-              adminSubTab={adminSubTab}
-              onSelectSubTab={setAdminSubTab}
-              onReturnToStorefront={() => setActiveTab('home')}
-              onAddProduct={openCreateProduct}
-              onToggleProductAvailability={handleToggleProductAvailability}
-              onEditProduct={openEditProduct}
-              onDeleteProduct={confirmDeleteProduct}
-              onAddCategory={openCreateCategory}
-              onEditCategory={openEditCategory}
-              onDeleteCategory={confirmDeleteCategory}
-              onRoleChange={handleRoleChange}
-              payments={payments}
-              isLoadingPayments={isLoadingPayments}
-              onVerifyPayment={(p) => setSelectedVerifyPayment(p)}
-              onRejectPayment={(p) => setSelectedRejectPayment(p)}
-              onViewAudit={(p) => setSelectedAuditPayment(p)}
-              onRefreshPayments={loadPayments}
-              orders={adminOrders}
-              orderCounts={adminOrderCounts}
-              isLoadingOrders={isLoadingOrders}
-              onUpdateOrderStatus={handleUpdateOrderStatus}
-              onInspectOrder={(o) => setSelectedInspectOrder(o)}
-              onRefreshOrders={loadAdminOrders}
-              onRetryAdmin={handleRetryAdmin}
-              getToken={getToken}
-              showToast={showToast}
-              onSettingsUpdated={(newSettings) => setRestaurantSettings(newSettings)}
             />
           </div>
         ) : activeTab === 'orders' ? (
@@ -629,7 +750,7 @@ export default function App() {
             <CustomerOrdersPage
               getToken={getToken}
               isSignedIn={!!isSignedIn}
-              onNavigateToMenu={() => setActiveTab('menu')}
+              onNavigateToMenu={() => handleTabChange('menu')}
               initialSelectedOrderId={trackingOrderId}
             />
           </div>
@@ -650,7 +771,7 @@ export default function App() {
               menuError={menuError}
               refreshMenu={refreshMenu}
               onAddToCart={addProductToCart}
-              onNavigateToMenu={() => setActiveTab('menu')}
+              onNavigateToMenu={() => handleTabChange('menu')}
               showHero={false}
             />
           </div>
@@ -661,7 +782,7 @@ export default function App() {
             userEmail={user?.primaryEmailAddress?.emailAddress}
             userName={user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim()}
             showToast={showToast}
-            onNavigateToMenu={() => setActiveTab('menu')}
+            onNavigateToMenu={() => handleTabChange('menu')}
             restaurantSettings={restaurantSettings}
           />
         ) : (
@@ -672,7 +793,7 @@ export default function App() {
             menuError={menuError}
             refreshMenu={refreshMenu}
             onAddToCart={addProductToCart}
-            onNavigateToMenu={() => setActiveTab('menu')}
+            onNavigateToMenu={() => handleTabChange('menu')}
             showHero={true}
           />
         )}
@@ -702,7 +823,7 @@ export default function App() {
         onBrowseMenu={() => {
           setIsCartDrawerOpen(false)
           if (activeTab !== 'menu' && activeTab !== 'home') {
-            setActiveTab('menu')
+            handleTabChange('menu')
           }
           const menuEl = document.getElementById('menu-section')
           if (menuEl) {
@@ -728,7 +849,7 @@ export default function App() {
         onOrderSuccess={handleOrderSuccess}
         onTrackOrder={(order) => {
           setTrackingOrderId(order.orderNumber)
-          setActiveTab('orders')
+          handleTabChange('orders')
         }}
         restaurantSettings={restaurantSettings}
       />

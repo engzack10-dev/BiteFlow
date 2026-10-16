@@ -73,28 +73,22 @@ export function StorefrontMenu({
   })
 
   return (
-    <section className="storefront-menu-section" id="menu-section">
-      {/* Chef Artwork & "Our Menu" Script Heading */}
-      <div className="menu-header-banner">
-        <div className="chef-illustration-box">
-          <img
-            src="/chef-pizza.jpg"
-            alt="Chef serving fresh pizza"
-            className="chef-artwork-img"
-            onError={(e) => {
-              ;(e.target as HTMLImageElement).src = '/delicious-burger.jpg'
-            }}
-          />
-        </div>
-        <h2 className="menu-script-heading">Our Menu</h2>
+    <section className="delicious-menu-section" id="menu-section">
+      {/* Modern Centered "What's Cooking - Our Delicious Menu" Header */}
+      <div className="delicious-menu-header">
+        <span className="delicious-menu-script-sub">What&apos;s Cooking</span>
+        <h2 className="delicious-menu-main-title">
+          Our Delicious <span className="delicious-title-accent">Menu</span>
+        </h2>
+        <div className="delicious-title-underline" />
       </div>
 
-      {/* Category Filter Tabs: All, Pizza, Burger, Chicken, ... */}
-      <div className="storefront-category-tabs" role="tablist" aria-label="Menu Categories">
+      {/* Category Filter Pills: All, Burgers, Pizza, Chicken, ... */}
+      <div className="delicious-category-tabs" role="tablist" aria-label="Menu Categories">
         <button
           role="tab"
           aria-selected={selectedCategory === 'all'}
-          className={`category-tab-btn ${selectedCategory === 'all' ? 'active' : ''}`}
+          className={`delicious-category-pill ${selectedCategory === 'all' ? 'active' : ''}`}
           onClick={() => setSelectedCategory('all')}
         >
           All
@@ -110,7 +104,7 @@ export function StorefrontMenu({
                 key={c._id}
                 role="tab"
                 aria-selected={isSelected}
-                className={`category-tab-btn ${isSelected ? 'active' : ''}`}
+                className={`delicious-category-pill ${isSelected ? 'active' : ''}`}
                 onClick={() => setSelectedCategory(c.name.toLowerCase())}
               >
                 {c.name}
@@ -118,28 +112,28 @@ export function StorefrontMenu({
             )
           })
         ) : (
-          /* Fallback static buttons if categories are loading */
+          /* Fallback static buttons while categories load */
           <>
             <button
               role="tab"
+              aria-selected={selectedCategory === 'burger'}
+              className={`delicious-category-pill ${selectedCategory === 'burger' ? 'active' : ''}`}
+              onClick={() => setSelectedCategory('burger')}
+            >
+              Burgers
+            </button>
+            <button
+              role="tab"
               aria-selected={selectedCategory === 'pizza'}
-              className={`category-tab-btn ${selectedCategory === 'pizza' ? 'active' : ''}`}
+              className={`delicious-category-pill ${selectedCategory === 'pizza' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('pizza')}
             >
               Pizza
             </button>
             <button
               role="tab"
-              aria-selected={selectedCategory === 'burger'}
-              className={`category-tab-btn ${selectedCategory === 'burger' ? 'active' : ''}`}
-              onClick={() => setSelectedCategory('burger')}
-            >
-              Burger
-            </button>
-            <button
-              role="tab"
               aria-selected={selectedCategory === 'chicken'}
-              className={`category-tab-btn ${selectedCategory === 'chicken' ? 'active' : ''}`}
+              className={`delicious-category-pill ${selectedCategory === 'chicken' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('chicken')}
             >
               Chicken
@@ -183,7 +177,7 @@ export function StorefrontMenu({
           )}
         </div>
       ) : (
-        <div className="storefront-products-grid">
+        <div className="delicious-products-grid">
           {displayedProducts.map((prod) => (
             <ProductCard
               key={prod._id}
