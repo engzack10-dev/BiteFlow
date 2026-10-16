@@ -1,7 +1,6 @@
 import { SignInButton, UserButton, Show } from '@clerk/react'
 import type { UserProfile, RestaurantSettingsData } from '../../types/index.js'
 import { ThemeToggle } from '../common/ThemeToggle.js'
-import { ClipboardListIcon } from '../common/AdminIcons.js'
 
 export type NavTab = 'home' | 'menu' | 'cart' | 'admin' | 'about' | 'contact' | 'orders'
 
@@ -19,7 +18,6 @@ export function Header({
   activeTab,
   onTabChange,
   onOpenCart,
-  onOpenOrders,
   userProfile,
   totalItemCount,
   restaurantSettings,
@@ -102,14 +100,6 @@ export function Header({
         >
           MENU
         </button>
-        <Show when="signed-in">
-          <button
-            className={`nav-link ${activeTab === 'orders' ? 'active' : ''}`}
-            onClick={() => onTabChange('orders')}
-          >
-            MY ORDERS
-          </button>
-        </Show>
         <button
           className={`nav-link ${activeTab === 'about' ? 'active' : ''}`}
           onClick={() => onTabChange('about')}
@@ -154,34 +144,7 @@ export function Header({
 
         {/* User profile / My Account */}
         <Show when="signed-in">
-          {onOpenOrders && (
-            <button
-              type="button"
-              className="header-orders-btn"
-              onClick={onOpenOrders}
-              title="View my placed orders and payment status"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-            >
-              <ClipboardListIcon size={14} />
-              <span>My Orders</span>
-            </button>
-          )}
           <div className="header-user-box">
-            {userProfile && (
-              <span
-                className={`role-badge ${userProfile.role}`}
-                style={{
-                  marginRight: '0.4rem',
-                  cursor: isAuthorizedAdmin ? 'pointer' : 'default',
-                }}
-                onClick={() => {
-                  if (isAuthorizedAdmin) onTabChange('admin')
-                }}
-                title={isAuthorizedAdmin ? 'Switch to Admin Command Center' : undefined}
-              >
-                {userProfile.role}
-              </span>
-            )}
             <span
               className="user-account-label"
               style={{

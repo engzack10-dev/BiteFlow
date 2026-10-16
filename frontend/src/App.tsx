@@ -705,10 +705,6 @@ export default function App() {
           handleTabChange(tab)
         }}
         onOpenCart={() => setIsCartDrawerOpen(true)}
-        onOpenOrders={() => {
-          setTrackingOrderId(null)
-          handleTabChange('orders')
-        }}
         userProfile={userProfile}
         totalItemCount={totalUnitCount}
         restaurantSettings={restaurantSettings}
