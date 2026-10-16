@@ -26,7 +26,17 @@ const PORT = process.env.PORT || 5000
 // 1. CORS Middleware
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, server-to-server)
+      if (!origin) return callback(null, true)
+
+      // Allow any localhost / 127.0.0.1 port (e.g., 5173, 5174, 5175)
+      if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        return callback(null, true)
+      }
+
+      return callback(null, false)
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-test-user-id', 'x-test-bypass-rate-limit'],
