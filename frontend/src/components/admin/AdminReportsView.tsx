@@ -75,6 +75,7 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
   })
   const [sellingStartDate, setSellingStartDate] = useState('')
   const [sellingEndDate, setSellingEndDate] = useState('')
+  const [sellingSearchFilter, setSellingSearchFilter] = useState('')
 
   // 3. Order Report State
   const [orderData, setOrderData] = useState<{
@@ -100,6 +101,7 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
   const [orderEndDate, setOrderEndDate] = useState('')
   const [orderStatusFilter, setOrderStatusFilter] = useState('ALL')
   const [orderPaymentFilter, setOrderPaymentFilter] = useState('ALL')
+  const [orderSearchFilter, setOrderSearchFilter] = useState('')
 
   // 4. Feedback Report State
   const [feedbackData, setFeedbackData] = useState<{
@@ -183,13 +185,14 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
   }, [getToken, prodCategoryFilter, prodAvailabilityFilter, prodSearchFilter])
 
   // Fetch Selling Report
-  const loadSellingReport = useCallback(async (start?: string, end?: string) => {
+  const loadSellingReport = useCallback(async (start?: string, end?: string, search?: string) => {
     setIsLoading(true)
     setError(null)
     try {
       const res = await api.getAdminSellingReport(getToken, {
         startDate: start || undefined,
         endDate: end || undefined,
+        search: search || undefined,
       })
       setSellingData({
         items: res.products,
@@ -206,7 +209,7 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
 
   // Fetch Order Report
   const loadOrderReport = useCallback(
-    async (start?: string, end?: string, status?: string, payment?: string) => {
+    async (start?: string, end?: string, status?: string, payment?: string, search?: string) => {
       setIsLoading(true)
       setError(null)
       try {
@@ -215,6 +218,7 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
           endDate: end || undefined,
           status: status || undefined,
           paymentStatus: payment || undefined,
+          search: search || undefined,
         })
         setOrderData({
           items: res.orders,
@@ -284,9 +288,9 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
     Promise.resolve().then(() => {
       if (isCancelled) return
       if (activeTab === 'products') void loadProductReport()
-      else if (activeTab === 'selling') void loadSellingReport(sellingStartDate, sellingEndDate)
+      else if (activeTab === 'selling') void loadSellingReport(sellingStartDate, sellingEndDate, sellingSearchFilter)
       else if (activeTab === 'orders')
-        void loadOrderReport(orderStartDate, orderEndDate, orderStatusFilter, orderPaymentFilter)
+        void loadOrderReport(orderStartDate, orderEndDate, orderStatusFilter, orderPaymentFilter, orderSearchFilter)
       else if (activeTab === 'feedback')
         void loadFeedbackReport(feedbackStartDate, feedbackEndDate, feedbackStatusFilter)
       else if (activeTab === 'overview') void loadOverviewReport(overviewStartDate, overviewEndDate)
@@ -303,10 +307,12 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
     loadOverviewReport,
     sellingStartDate,
     sellingEndDate,
+    sellingSearchFilter,
     orderStartDate,
     orderEndDate,
     orderStatusFilter,
     orderPaymentFilter,
+    orderSearchFilter,
     feedbackStartDate,
     feedbackEndDate,
     feedbackStatusFilter,
@@ -412,6 +418,7 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
     exportToCSV(columns, sellingData.items, filename, [
       { label: 'Report', value: 'BiteFlow Historical Selling & Verified Revenue Report' },
       { label: 'Reporting Period', value: `${sellingData.period.startDate || 'Beginning'} through ${sellingData.period.endDate || 'Present'}` },
+      { label: 'Search Query', value: sellingSearchFilter || 'None' },
       { label: 'Total Verified Revenue', value: `$${sellingData.summary.totalVerifiedRevenue.toFixed(2)}` },
       { label: 'Total Items Sold', value: String(sellingData.summary.totalItemCount) },
       { label: 'Qualifying Orders', value: String(sellingData.summary.totalVerifiedOrders) },
@@ -446,6 +453,7 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
               ? `${sellingData.period.startDate || 'Earliest'} — ${sellingData.period.endDate || 'Latest'}`
               : 'All-Time Persisted Records',
         },
+        { label: 'Search Query', value: sellingSearchFilter || 'None' },
         { label: 'Unique Products Sold', value: String(sellingData.summary.productsSoldCount) },
         { label: 'Qualifying Orders', value: String(sellingData.summary.totalVerifiedOrders) },
       ],
@@ -497,6 +505,7 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
               ? `${orderData.period.startDate || 'Beginning'} — ${orderData.period.endDate || 'Present'}`
               : 'All Orders Placed',
         },
+        { label: 'Search Query', value: orderSearchFilter || 'None' },
         { label: 'Order Status Filter', value: orderStatusFilter },
         { label: 'Payment Status Filter', value: orderPaymentFilter },
         { label: 'Total Matching Orders', value: String(orderData.summary.totalOrders) },
@@ -709,9 +718,9 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
             className="btn-retry"
             onClick={() => {
               if (activeTab === 'products') void loadProductReport()
-              else if (activeTab === 'selling') void loadSellingReport(sellingStartDate, sellingEndDate)
+              else if (activeTab === 'selling') void loadSellingReport(sellingStartDate, sellingEndDate, sellingSearchFilter)
               else if (activeTab === 'orders')
-                void loadOrderReport(orderStartDate, orderEndDate, orderStatusFilter, orderPaymentFilter)
+                void loadOrderReport(orderStartDate, orderEndDate, orderStatusFilter, orderPaymentFilter, orderSearchFilter)
               else if (activeTab === 'feedback')
                 void loadFeedbackReport(feedbackStartDate, feedbackEndDate, feedbackStatusFilter)
               else if (activeTab === 'overview') void loadOverviewReport(overviewStartDate, overviewEndDate)
@@ -957,7 +966,21 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
               gap: '1rem',
             }}
           >
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end', flex: '1 1 500px' }}>
+              <div style={{ flex: '1 1 200px' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted, #6b7280)', marginBottom: '0.35rem' }}>
+                  Search Product / Dish:
+                </label>
+                <input
+                  type="text"
+                  className="input-text"
+                  placeholder="Filter by sold dish name..."
+                  value={sellingSearchFilter}
+                  onChange={(e) => setSellingSearchFilter(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && void loadSellingReport(sellingStartDate, sellingEndDate, sellingSearchFilter)}
+                  style={{ width: '100%', fontSize: '0.85rem' }}
+                />
+              </div>
               <div className="date-input-group">
                 <label htmlFor="selling-start-date" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
                   Start Date:
@@ -985,19 +1008,20 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
               <button
                 type="button"
                 className="btn-action btn-inspect"
-                onClick={() => void loadSellingReport(sellingStartDate, sellingEndDate)}
+                onClick={() => void loadSellingReport(sellingStartDate, sellingEndDate, sellingSearchFilter)}
                 disabled={isLoading}
               >
-                Apply Range
+                Apply Filters
               </button>
-              {(sellingStartDate || sellingEndDate) && (
+              {(sellingStartDate || sellingEndDate || sellingSearchFilter) && (
                 <button
                   type="button"
                   className="btn-action btn-continue"
                   onClick={() => {
                     setSellingStartDate('')
                     setSellingEndDate('')
-                    void loadSellingReport('', '')
+                    setSellingSearchFilter('')
+                    void loadSellingReport('', '', '')
                   }}
                   disabled={isLoading}
                 >
@@ -1175,6 +1199,23 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
             }}
           >
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end', flex: '1 1 500px' }}>
+              <div style={{ flex: '1 1 200px' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted, #6b7280)', marginBottom: '0.35rem' }}>
+                  Search Order / Customer:
+                </label>
+                <input
+                  type="text"
+                  className="input-text"
+                  placeholder="Order #, name, phone, address..."
+                  value={orderSearchFilter}
+                  onChange={(e) => setOrderSearchFilter(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === 'Enter' &&
+                    void loadOrderReport(orderStartDate, orderEndDate, orderStatusFilter, orderPaymentFilter, orderSearchFilter)
+                  }
+                  style={{ width: '100%', fontSize: '0.85rem' }}
+                />
+              </div>
               <div className="date-input-group">
                 <label htmlFor="order-start-date" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
                   Start Date:
@@ -1239,13 +1280,13 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
                 type="button"
                 className="btn-action btn-inspect"
                 onClick={() =>
-                  void loadOrderReport(orderStartDate, orderEndDate, orderStatusFilter, orderPaymentFilter)
+                  void loadOrderReport(orderStartDate, orderEndDate, orderStatusFilter, orderPaymentFilter, orderSearchFilter)
                 }
                 disabled={isLoading}
               >
-                Filter Orders
+                Apply Filters
               </button>
-              {(orderStartDate || orderEndDate || orderStatusFilter !== 'ALL' || orderPaymentFilter !== 'ALL') && (
+              {(orderStartDate || orderEndDate || orderStatusFilter !== 'ALL' || orderPaymentFilter !== 'ALL' || orderSearchFilter) && (
                 <button
                   type="button"
                   className="btn-action btn-continue"
@@ -1254,7 +1295,8 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
                     setOrderEndDate('')
                     setOrderStatusFilter('ALL')
                     setOrderPaymentFilter('ALL')
-                    void loadOrderReport('', '', 'ALL', 'ALL')
+                    setOrderSearchFilter('')
+                    void loadOrderReport('', '', 'ALL', 'ALL', '')
                   }}
                   disabled={isLoading}
                 >

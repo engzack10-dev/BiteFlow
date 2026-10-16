@@ -460,11 +460,12 @@ export const api = {
 
   getAdminSellingReport: (
     getToken: () => Promise<string | null>,
-    filters?: { startDate?: string; endDate?: string }
+    filters?: { startDate?: string; endDate?: string; search?: string }
   ) => {
     const params = new URLSearchParams()
     if (filters?.startDate) params.set('startDate', filters.startDate)
     if (filters?.endDate) params.set('endDate', filters.endDate)
+    if (filters?.search && filters.search.trim()) params.set('search', filters.search.trim())
     const qs = params.toString() ? `?${params.toString()}` : ''
     return request<SellingReportResponse>(
       `/api/admin/reports/selling${qs}`,
@@ -475,13 +476,14 @@ export const api = {
 
   getAdminOrderReport: (
     getToken: () => Promise<string | null>,
-    filters?: { startDate?: string; endDate?: string; status?: string; paymentStatus?: string }
+    filters?: { startDate?: string; endDate?: string; status?: string; paymentStatus?: string; search?: string }
   ) => {
     const params = new URLSearchParams()
     if (filters?.startDate) params.set('startDate', filters.startDate)
     if (filters?.endDate) params.set('endDate', filters.endDate)
     if (filters?.status && filters.status !== 'ALL') params.set('status', filters.status)
     if (filters?.paymentStatus && filters.paymentStatus !== 'ALL') params.set('paymentStatus', filters.paymentStatus)
+    if (filters?.search && filters.search.trim()) params.set('search', filters.search.trim())
     const qs = params.toString() ? `?${params.toString()}` : ''
     return request<OrderReportResponse>(
       `/api/admin/reports/orders${qs}`,

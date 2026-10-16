@@ -417,7 +417,11 @@ adminRouter.get(
   '/reports/selling',
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const { startDate, endDate } = req.query as { startDate?: string; endDate?: string }
+      const { startDate, endDate, search } = req.query as {
+        startDate?: string
+        endDate?: string
+        search?: string
+      }
       const { dateFilter, error } = parseDateFilter(startDate, endDate)
 
       if (error) {
@@ -476,6 +480,12 @@ adminRouter.get(
         }
       })
 
+      let filteredProducts = products
+      if (search && search.trim()) {
+        const query = search.trim().toLowerCase()
+        filteredProducts = products.filter((p) => p.productName.toLowerCase().includes(query))
+      }
+
       res.json({
         success: true,
         period: {
@@ -486,10 +496,10 @@ adminRouter.get(
           totalVerifiedRevenue,
           totalItemCount,
           totalVerifiedOrders,
-          productsSoldCount: products.length,
+          productsSoldCount: filteredProducts.length,
           currency: 'USD',
         },
-        products,
+        products: filteredProducts,
         generatedAt: new Date().toISOString(),
       })
     } catch (error) {
@@ -507,11 +517,12 @@ adminRouter.get(
   '/reports/orders',
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const { startDate, endDate, status, paymentStatus } = req.query as {
+      const { startDate, endDate, status, paymentStatus, search } = req.query as {
         startDate?: string
         endDate?: string
         status?: string
         paymentStatus?: string
+        search?: string
       }
 
       const { dateFilter, error } = parseDateFilter(startDate, endDate)
@@ -529,6 +540,16 @@ adminRouter.get(
       }
       if (paymentStatus && paymentStatus !== 'ALL') {
         matchQuery.paymentStatus = paymentStatus
+      }
+      if (search && search.trim()) {
+        const s = search.trim()
+        matchQuery.$or = [
+          { orderNumber: { $regex: s, $options: 'i' } },
+          { customerName: { $regex: s, $options: 'i' } },
+          { customerPhone: { $regex: s, $options: 'i' } },
+          { customerEmail: { $regex: s, $options: 'i' } },
+          { deliveryAddress: { $regex: s, $options: 'i' } },
+        ]
       }
 
       const orders = await Order.find(matchQuery)
