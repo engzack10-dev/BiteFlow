@@ -481,9 +481,14 @@ adminRouter.get(
       })
 
       let filteredProducts = products
+      let totalFilteredRevenue = totalVerifiedRevenue
+      let totalFilteredItemCount = totalItemCount
+
       if (search && search.trim()) {
         const query = search.trim().toLowerCase()
         filteredProducts = products.filter((p) => p.productName.toLowerCase().includes(query))
+        totalFilteredRevenue = Number(filteredProducts.reduce((sum, p) => sum + p.revenue, 0).toFixed(2))
+        totalFilteredItemCount = filteredProducts.reduce((sum, p) => sum + p.quantitySold, 0)
       }
 
       res.json({
@@ -493,8 +498,8 @@ adminRouter.get(
           endDate: endDate || null,
         },
         summary: {
-          totalVerifiedRevenue,
-          totalItemCount,
+          totalVerifiedRevenue: totalFilteredRevenue,
+          totalItemCount: totalFilteredItemCount,
           totalVerifiedOrders,
           productsSoldCount: filteredProducts.length,
           currency: 'USD',
@@ -542,14 +547,64 @@ adminRouter.get(
         matchQuery.paymentStatus = paymentStatus
       }
       if (search && search.trim()) {
-        const s = search.trim()
-        matchQuery.$or = [
-          { orderNumber: { $regex: s, $options: 'i' } },
-          { customerName: { $regex: s, $options: 'i' } },
-          { customerPhone: { $regex: s, $options: 'i' } },
-          { customerEmail: { $regex: s, $options: 'i' } },
-          { deliveryAddress: { $regex: s, $options: 'i' } },
+        const trimmed = search.trim()
+        const safeRegex = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const regexObj = { $regex: safeRegex, $options: 'i' }
+
+        const orConditions: any[] = [
+          { orderNumber: regexObj },
+          { customerName: regexObj },
+          { customerPhone: regexObj },
+          { customerEmail: regexObj },
+          { deliveryAddress: regexObj },
+          { deliveryArea: regexObj },
+          { 'items.name': regexObj },
+          { status: regexObj },
+          { paymentStatus: regexObj },
         ]
+
+        // Allow leading # stripping (e.g. #ORD-123 -> ORD-123)
+        const cleanTerm = trimmed.replace(/^[#]+/, '').trim()
+        if (cleanTerm && cleanTerm !== trimmed) {
+          orConditions.push({
+            orderNumber: { $regex: cleanTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' },
+          })
+        }
+
+        // Phone numbers: match normalized digits (stripping +, spaces, hyphens)
+        const digitsOnly = trimmed.replace(/\D/g, '')
+        if (digitsOnly.length >= 3) {
+          orConditions.push({ customerPhone: { $regex: digitsOnly, $options: 'i' } })
+          if (digitsOnly.length > 7) {
+            orConditions.push({ customerPhone: { $regex: digitsOnly.slice(-7), $options: 'i' } })
+          }
+        }
+
+        // Match human-readable status labels
+        const lower = trimmed.toLowerCase()
+        if ('awaiting payment'.includes(lower) || lower.includes('awaiting')) {
+          orConditions.push({ status: 'PENDING_PAYMENT' })
+        }
+        if ('confirmed'.includes(lower)) {
+          orConditions.push({ status: 'CONFIRMED' })
+        }
+        if ('preparing'.includes(lower) || 'kitchen'.includes(lower)) {
+          orConditions.push({ status: 'PREPARING' })
+        }
+        if ('ready'.includes(lower)) {
+          orConditions.push({ status: 'READY' })
+        }
+        if ('dispatched'.includes(lower) || 'out for delivery'.includes(lower)) {
+          orConditions.push({ status: 'DISPATCHED' })
+        }
+        if ('delivered'.includes(lower)) {
+          orConditions.push({ status: 'DELIVERED' })
+        }
+        if ('verified'.includes(lower)) {
+          orConditions.push({ paymentStatus: 'VERIFIED' })
+        }
+
+        matchQuery.$or = orConditions
       }
 
       const orders = await Order.find(matchQuery)

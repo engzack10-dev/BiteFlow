@@ -307,18 +307,34 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
     loadOverviewReport,
     sellingStartDate,
     sellingEndDate,
-    sellingSearchFilter,
     orderStartDate,
     orderEndDate,
     orderStatusFilter,
     orderPaymentFilter,
-    orderSearchFilter,
     feedbackStartDate,
     feedbackEndDate,
     feedbackStatusFilter,
     overviewStartDate,
     overviewEndDate,
   ])
+
+  // Debounced live search for Order Report
+  useEffect(() => {
+    if (activeTab !== 'orders') return
+    const timer = setTimeout(() => {
+      void loadOrderReport(orderStartDate, orderEndDate, orderStatusFilter, orderPaymentFilter, orderSearchFilter)
+    }, 350)
+    return () => clearTimeout(timer)
+  }, [orderSearchFilter, activeTab, loadOrderReport, orderStartDate, orderEndDate, orderStatusFilter, orderPaymentFilter])
+
+  // Debounced live search for Selling Report
+  useEffect(() => {
+    if (activeTab !== 'selling') return
+    const timer = setTimeout(() => {
+      void loadSellingReport(sellingStartDate, sellingEndDate, sellingSearchFilter)
+    }, 350)
+    return () => clearTimeout(timer)
+  }, [sellingSearchFilter, activeTab, loadSellingReport, sellingStartDate, sellingEndDate])
 
   // ==========================================
   // EXPORT HANDLERS (CSV & PDF)
@@ -977,7 +993,12 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
                   placeholder="Filter by sold dish name..."
                   value={sellingSearchFilter}
                   onChange={(e) => setSellingSearchFilter(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && void loadSellingReport(sellingStartDate, sellingEndDate, sellingSearchFilter)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      void loadSellingReport(sellingStartDate, sellingEndDate, sellingSearchFilter)
+                    }
+                  }}
                   style={{ width: '100%', fontSize: '0.85rem' }}
                 />
               </div>
@@ -1009,7 +1030,6 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
                 type="button"
                 className="btn-action btn-inspect"
                 onClick={() => void loadSellingReport(sellingStartDate, sellingEndDate, sellingSearchFilter)}
-                disabled={isLoading}
               >
                 Apply Filters
               </button>
@@ -1118,16 +1138,16 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
           </div>
 
           {/* Selling Products Table */}
-          {isLoading ? (
+          {isLoading && sellingData.items.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#6b7280' }}>
               Calculating authoritative sales totals and item demand...
             </div>
-          ) : sellingData.items.length === 0 ? (
+          ) : !isLoading && sellingData.items.length === 0 ? (
             <div className="customer-orders-empty">
-              <p>No verified product sales recorded for this date range.</p>
+              <p>No verified product sales recorded for this criteria.</p>
             </div>
           ) : (
-            <div className="dashboard-section-box">
+            <div className="dashboard-section-box" style={{ opacity: isLoading ? 0.6 : 1, transition: 'opacity 0.15s ease' }}>
               <div style={{ overflowX: 'auto' }}>
                 <table className="admin-data-table" style={{ margin: 0 }}>
                   <thead>
@@ -1206,13 +1226,15 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
                 <input
                   type="text"
                   className="input-text"
-                  placeholder="Order #, name, phone, address..."
+                  placeholder="Order #, customer, dish, phone, area..."
                   value={orderSearchFilter}
                   onChange={(e) => setOrderSearchFilter(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' &&
-                    void loadOrderReport(orderStartDate, orderEndDate, orderStatusFilter, orderPaymentFilter, orderSearchFilter)
-                  }
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      void loadOrderReport(orderStartDate, orderEndDate, orderStatusFilter, orderPaymentFilter, orderSearchFilter)
+                    }
+                  }}
                   style={{ width: '100%', fontSize: '0.85rem' }}
                 />
               </div>
@@ -1282,7 +1304,6 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
                 onClick={() =>
                   void loadOrderReport(orderStartDate, orderEndDate, orderStatusFilter, orderPaymentFilter, orderSearchFilter)
                 }
-                disabled={isLoading}
               >
                 Apply Filters
               </button>
@@ -1352,16 +1373,16 @@ export function AdminReportsView({ getToken }: AdminReportsViewProps) {
           </div>
 
           {/* Orders Report Table */}
-          {isLoading ? (
+          {isLoading && orderData.items.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#6b7280' }}>
               Querying order lifecycle records...
             </div>
-          ) : orderData.items.length === 0 ? (
+          ) : !isLoading && orderData.items.length === 0 ? (
             <div className="customer-orders-empty">
-              <p>No orders match the selected filters and date range.</p>
+              <p>No orders match the selected filters and search query.</p>
             </div>
           ) : (
-            <div className="dashboard-section-box">
+            <div className="dashboard-section-box" style={{ opacity: isLoading ? 0.6 : 1, transition: 'opacity 0.15s ease' }}>
               <div style={{ overflowX: 'auto' }}>
                 <table className="admin-data-table" style={{ margin: 0 }}>
                   <thead>
