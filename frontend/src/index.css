@@ -666,21 +666,22 @@ button {
 }
 
 .feane-footer-heading {
-  font-family: var(--font-script);
-  font-size: 1.85rem;
+  font-family: var(--font-nav);
+  font-size: 1.45rem;
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 1.25rem;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.01em;
 }
 
 .feane-footer-brand {
-  font-family: var(--font-script);
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-family: var(--font-nav);
+  font-size: 2.25rem;
+  font-weight: 800;
   color: #ffffff;
   margin-bottom: 0.85rem;
-  line-height: 1.1;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .feane-footer-mission {
@@ -1661,12 +1662,13 @@ button {
 }
 
 .delicious-menu-script-sub {
-  font-family: var(--font-script);
-  font-size: 2.25rem;
+  font-family: var(--font-nav);
+  font-size: 1.35rem;
   font-weight: 700;
-  color: #e11d48;
-  line-height: 1.1;
-  margin-bottom: 0.25rem;
+  color: #ea580c;
+  line-height: 1.2;
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.01em;
 }
 
 .delicious-menu-main-title {
@@ -1679,14 +1681,14 @@ button {
 }
 
 .delicious-title-accent {
-  color: #e11d48;
+  color: #ea580c;
 }
 
 .delicious-title-underline {
-  width: 50px;
-  height: 3px;
-  background: #e11d48;
-  border-radius: 2px;
+  width: 54px;
+  height: 3.5px;
+  background: linear-gradient(90deg, #f59e0b, #ea580c);
+  border-radius: 9999px;
   margin-top: 0.75rem;
 }
 
@@ -1720,10 +1722,10 @@ button {
 }
 
 .delicious-category-pill.active {
-  background: #e11d48;
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
   color: #ffffff;
-  border-color: #e11d48;
-  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+  border-color: #ea580c;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
 }
 
 /* Modern 3-Column Delicious Products Grid */
@@ -1796,7 +1798,7 @@ button {
 }
 
 .delicious-wishlist-btn.favorited {
-  background: #fff1f2;
+  background: #fff7ed;
 }
 
 .delicious-card-badge-wrapper {
@@ -1818,7 +1820,7 @@ button {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #e11d48;
+  color: #ea580c;
   margin-bottom: 0.4rem;
 }
 
@@ -1834,7 +1836,7 @@ button {
 }
 
 .delicious-card-title:hover {
-  color: #e11d48;
+  color: #ea580c;
 }
 
 .delicious-card-desc {
@@ -1870,7 +1872,7 @@ button {
 .delicious-card-price {
   font-size: 1.35rem;
   font-weight: 800;
-  color: #e11d48;
+  color: #ea580c;
 }
 
 .delicious-rating-row {
@@ -1901,20 +1903,20 @@ button {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #e11d48;
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .delicious-quick-add-btn:hover:not(:disabled) {
-  background: #be123c;
+  background: linear-gradient(135deg, #fbbf24 0%, #ea580c 100%);
   transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(225, 29, 72, 0.45);
+  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.5);
 }
 
 .delicious-quick-add-btn:disabled {

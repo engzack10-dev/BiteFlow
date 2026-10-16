@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useUser, useAuth } from '@clerk/react'
 import { api } from './api/client.js'
 import type {
@@ -116,6 +116,7 @@ export default function App() {
   const [adminError, setAdminError] = useState<string | null>(null)
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(false)
   const [adminSubTab, setAdminSubTab] = useState<AdminSubTab>('dashboard')
+  const hasRedirectedAdminRef = useRef(false)
 
   // Admin: Payments Queue State (FS-06)
   const [payments, setPayments] = useState<PaymentRecord[]>([])
@@ -182,7 +183,7 @@ export default function App() {
     }
   }, [products, reconcileWithProducts])
 
-  // 2. Synchronize user with backend upon sign-in
+  // 2. Synchronize user with backend upon sign-in & direct admin to dashboard
   useEffect(() => {
     async function syncBackendUser() {
       if (!isUserLoaded) return
@@ -191,16 +192,23 @@ export default function App() {
         try {
           const res = await api.syncUser(getToken)
           setUserProfile(res.user)
+
+          // Direct admin users to the dedicated admin dashboard upon login
+          if (res.user?.role === 'admin' && !hasRedirectedAdminRef.current) {
+            hasRedirectedAdminRef.current = true
+            handleTabChange('admin')
+          }
         } catch (err) {
           console.error('Failed to sync user with backend:', err)
         }
       } else {
         setUserProfile(null)
+        hasRedirectedAdminRef.current = false
       }
     }
 
     syncBackendUser()
-  }, [isSignedIn, isUserLoaded, user, getToken])
+  }, [isSignedIn, isUserLoaded, user, getToken, handleTabChange])
 
   // Payments loader
   const loadPayments = async () => {

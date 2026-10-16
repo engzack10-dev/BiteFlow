@@ -152,18 +152,6 @@ export function Header({
           </span>
         </div>
 
-        {/* Admin Navigation for authorized Admin users only */}
-        {isAuthorizedAdmin && (
-          <button
-            type="button"
-            className={`header-admin-btn ${activeTab === 'admin' ? 'active' : ''}`}
-            onClick={() => onTabChange('admin')}
-            title="Open dedicated Admin Command Center"
-          >
-            🛡️ Admin Portal
-          </button>
-        )}
-
         {/* User profile / My Account */}
         <Show when="signed-in">
           {onOpenOrders && (
@@ -180,11 +168,32 @@ export function Header({
           )}
           <div className="header-user-box">
             {userProfile && (
-              <span className={`role-badge ${userProfile.role}`} style={{ marginRight: '0.4rem' }}>
+              <span
+                className={`role-badge ${userProfile.role}`}
+                style={{
+                  marginRight: '0.4rem',
+                  cursor: isAuthorizedAdmin ? 'pointer' : 'default',
+                }}
+                onClick={() => {
+                  if (isAuthorizedAdmin) onTabChange('admin')
+                }}
+                title={isAuthorizedAdmin ? 'Switch to Admin Command Center' : undefined}
+              >
                 {userProfile.role}
               </span>
             )}
-            <span className="user-account-label">My Account</span>
+            <span
+              className="user-account-label"
+              style={{
+                cursor: isAuthorizedAdmin ? 'pointer' : 'default',
+              }}
+              onClick={() => {
+                if (isAuthorizedAdmin) onTabChange('admin')
+              }}
+              title={isAuthorizedAdmin ? 'Switch to Admin Command Center' : undefined}
+            >
+              My Account
+            </span>
             <UserButton />
           </div>
         </Show>

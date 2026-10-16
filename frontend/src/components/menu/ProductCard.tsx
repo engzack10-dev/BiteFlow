@@ -80,8 +80,8 @@ export function ProductCard({
             width="17"
             height="17"
             viewBox="0 0 24 24"
-            fill={isFavorite ? '#e11d48' : 'none'}
-            stroke={isFavorite ? '#e11d48' : '#4b5563'}
+            fill={isFavorite ? '#ea580c' : 'none'}
+            stroke={isFavorite ? '#ea580c' : '#4b5563'}
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
