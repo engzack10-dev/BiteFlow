@@ -1,12 +1,7 @@
 import { useState } from 'react'
 import { api } from '../api/client.js'
 import {
-  PhoneIcon,
-  MailIcon,
-  ClockIcon,
   CheckCircleIcon,
-  MessageSquareIcon,
-  DeliveryIcon,
   AlertTriangleIcon,
 } from '../components/common/AdminIcons.js'
 
@@ -48,6 +43,50 @@ interface FieldErrors {
   message?: string
 }
 
+/* SVG Icons matching reference design */
+function MapPinIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  )
+}
+
+function PhoneCallIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
+  )
+}
+
+function EnvelopeIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect width="20" height="16" x="2" y="4" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </svg>
+  )
+}
+
+function ClockCircleIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  )
+}
+
+function SendPlaneIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+    </svg>
+  )
+}
+
 export function ContactPage({
   isSignedIn = false,
   userEmail = '',
@@ -56,9 +95,11 @@ export function ContactPage({
   onNavigateToMenu,
   restaurantSettings,
 }: ContactPageProps) {
-  const hotline = restaurantSettings?.contactPhone || '+252-61xxxxxxx'
+  const hotline = restaurantSettings?.contactPhone || '+252 61 734 3299'
   const supportEmail = restaurantSettings?.contactEmail || 'kitchen@biteflow.com'
-  const operatingHours = restaurantSettings?.operatingHours || '6:00 AM – 11:30 PM'
+  const operatingHours = restaurantSettings?.operatingHours || 'Everyday: 10:00 AM – 10:00 PM'
+  const address = '42 Flavor Street, Manhattan, New York, NY 10001'
+
   const [formData, setFormData] = useState<FormFields>(() => ({
     name: userName || '',
     email: userEmail || '',
@@ -77,14 +118,12 @@ export function ContactPage({
   const handleInputChange = (field: keyof FormFields, value: string) => {
     setFormData((prev) => {
       const next = { ...prev, [field]: value }
-      // Auto-update subject when category changes if subject matches previous category
       if (field === 'category' && (prev.subject === prev.category || !prev.subject.trim())) {
         next.subject = value === 'Other' ? '' : value
       }
       return next
     })
 
-    // Clear field-level error on change
     if (fieldErrors[field as keyof FieldErrors]) {
       setFieldErrors((prev) => ({ ...prev, [field]: undefined }))
     }
@@ -197,206 +236,135 @@ export function ContactPage({
   }
 
   return (
-    <div className="contact-page-container" style={{ maxWidth: '1100px', margin: '2rem auto 4rem', padding: '0 1.5rem' }}>
-      {/* Page Header */}
-      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-        <h1 className="menu-script-heading contact-page-title" style={{ fontSize: '2.8rem', color: '#ea580c', marginBottom: '0.5rem' }}>
-          Contact & Feedback
+    <div className="contact-section-container">
+      {/* Centered Hero Header */}
+      <div className="contact-hero-header">
+        <span className="contact-hero-script">Get In Touch</span>
+        <h1 className="contact-hero-title">
+          Contact <span className="contact-hero-title-accent">Us</span>
         </h1>
-        <p className="contact-page-subtitle" style={{ maxWidth: '640px', margin: '0 auto' }}>
-          Have a question about your order, food quality, dietary inquiries, or catering?
-          Our team is here to listen and help.
+        <div className="contact-hero-divider" aria-hidden="true" />
+        <p className="contact-hero-subtitle">
+          Have a question, feedback, or want to plan a special event?
+          <br />
+          We&apos;d love to hear from you.
         </p>
       </div>
 
-      {/* Main Two-Column Layout */}
-      <div
-        className="contact-layout-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '2rem',
-          alignItems: 'start',
-        }}
-      >
-        {/* Left Column: Restaurant Info Cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {/* Quick Contact Card */}
-          <div
-            className="contact-card contact-info-card"
-            style={{
-              padding: '1.75rem',
-            }}
-          >
-            <h2 className="contact-card-heading" style={{ marginBottom: '1.25rem' }}>
-              Restaurant Direct Lines
-            </h2>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                <div
-                  style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '10px',
-                    background: 'rgba(234, 88, 12, 0.1)',
-                    color: '#ea580c',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <PhoneIcon size={20} />
-                </div>
-                <div>
-                  <span className="contact-eyebrow">
-                    Delivery Hotline
-                  </span>
-                  <div className="contact-value">
-                    {hotline}
-                  </div>
-                  <span className="contact-caption">
-                    Immediate assistance for active deliveries
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                <div
-                  style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '10px',
-                    background: 'rgba(13, 148, 136, 0.1)',
-                    color: '#0d9488',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <MailIcon size={20} />
-                </div>
-                <div>
-                  <span className="contact-eyebrow">
-                    Kitchen & Support Email
-                  </span>
-                  <div className="contact-value">
-                    {supportEmail}
-                  </div>
-                  <span className="contact-caption">
-                    General inquiries, feedback, & catering
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                <div
-                  style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '10px',
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    color: '#3b82f6',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <ClockIcon size={20} />
-                </div>
-                <div>
-                  <span className="contact-eyebrow">
-                    Service Hours
-                  </span>
-                  <div className="contact-value">
-                    {operatingHours}
-                  </div>
-                  <span className="contact-caption">
-                    Open every day, rain or shine
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Delivery-Only Restaurant Note */}
-          <div className="contact-notice-card">
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <DeliveryIcon size={20} style={{ color: '#ea580c' }} />
-              <h3 className="contact-notice-heading">
-                Delivery-Only Kitchen
-              </h3>
-            </div>
-            <p className="contact-notice-text">
-              BiteFlow operates as a dedicated cloud kitchen. Every burger, pizza, and dish is prepared fresh to order
-              and couriered directly to your location with verified real-time tracking.
+      {/* Main 2-Column Cards Grid */}
+      <div className="contact-two-card-grid">
+        {/* Left Dark Card ("Let's Talk") */}
+        <aside className="contact-dark-card" aria-label="Restaurant contact details">
+          <div className="contact-dark-card-top">
+            <h2 className="contact-talk-heading">Let&apos;s Talk</h2>
+            <p className="contact-talk-subtext">
+              We typically respond within 2 hours during business hours.
             </p>
-          </div>
-        </div>
 
-        {/* Right Column: Feedback Form or Success State */}
-        <div
-          className="contact-card contact-form-card"
-          style={{
-            padding: '2rem',
-          }}
-        >
+            <div className="contact-details-list">
+              {/* Address */}
+              <div className="contact-detail-item">
+                <div className="contact-detail-icon-box">
+                  <MapPinIcon size={19} />
+                </div>
+                <div className="contact-detail-content">
+                  <span className="contact-detail-label">ADDRESS</span>
+                  <p className="contact-detail-text">
+                    {address}
+                  </p>
+                </div>
+              </div>
+
+              {/* Phone */}
+              <div className="contact-detail-item">
+                <div className="contact-detail-icon-box">
+                  <PhoneCallIcon size={19} />
+                </div>
+                <div className="contact-detail-content">
+                  <span className="contact-detail-label">PHONE</span>
+                  <a href={`tel:${hotline.replace(/\s+/g, '')}`} className="contact-detail-link">
+                    {hotline}
+                  </a>
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="contact-detail-item">
+                <div className="contact-detail-icon-box">
+                  <EnvelopeIcon size={19} />
+                </div>
+                <div className="contact-detail-content">
+                  <span className="contact-detail-label">EMAIL</span>
+                  <a href={`mailto:${supportEmail}`} className="contact-detail-link">
+                    {supportEmail}
+                  </a>
+                </div>
+              </div>
+
+              {/* Working Hours */}
+              <div className="contact-detail-item">
+                <div className="contact-detail-icon-box">
+                  <ClockCircleIcon size={19} />
+                </div>
+                <div className="contact-detail-content">
+                  <span className="contact-detail-label">WORKING HOURS</span>
+                  <p className="contact-detail-text">
+                    {operatingHours}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Social Icons Footer */}
+          <div className="contact-social-row" aria-label="Social media links">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="contact-social-btn" aria-label="Facebook">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="contact-social-btn" aria-label="Instagram">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="contact-social-btn" aria-label="Twitter">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="contact-social-btn" aria-label="YouTube">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+          </div>
+        </aside>
+
+        {/* Right Form Card */}
+        <div className="contact-form-card">
           {submittedFeedbackId ? (
-            /* SUCCESS CONFIRMATION STATE */
-            <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-              <div
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  background: 'rgba(5, 150, 105, 0.12)',
-                  color: '#059669',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 1.5rem',
-                }}
-              >
+            /* Success confirmation */
+            <div className="contact-success-box">
+              <div className="contact-success-icon-wrap">
                 <CheckCircleIcon size={38} />
               </div>
 
-              <h2 className="contact-card-heading" style={{ fontSize: '1.6rem', marginBottom: '0.75rem' }}>
+              <h2 className="contact-success-title">
                 Thank You! Message Received
               </h2>
 
-              <p className="contact-page-subtitle" style={{ fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+              <p className="contact-success-desc">
                 Your message has been securely submitted and recorded in our management queue.
                 {confirmedEmail ? (
                   <>
                     <br />
-                    If a response is required, our manager will reach out directly to{' '}
-                    <strong style={{ color: 'var(--text-dark)' }}>{confirmedEmail}</strong>.
+                    If a response is required, our team will reach out directly to{' '}
+                    <strong>{confirmedEmail}</strong>.
                   </>
                 ) : null}
               </p>
 
-              <div
-                className="contact-ref-badge"
-                style={{
-                  background: 'var(--bg-page, #f9fafb)',
-                  border: '1px dashed var(--border-light, #e5e7eb)',
-                  borderRadius: '10px',
-                  padding: '0.75rem 1rem',
-                  color: 'var(--text-muted)',
-                  display: 'inline-block',
-                  marginBottom: '2rem',
-                }}
-              >
-                Reference ID: <strong style={{ color: 'var(--text-dark)' }}>#{submittedFeedbackId.slice(-6).toUpperCase()}</strong>
+              <div className="contact-ref-badge-wrap">
+                Reference ID: <strong>#{submittedFeedbackId.slice(-6).toUpperCase()}</strong>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <div className="contact-success-actions">
                 <button
                   type="button"
-                  className="btn-action btn-continue contact-btn-secondary"
+                  className="contact-btn-alt"
                   onClick={handleResetForm}
                 >
                   Send Another Message
@@ -404,8 +372,7 @@ export function ContactPage({
                 {onNavigateToMenu && (
                   <button
                     type="button"
-                    className="btn-action btn-checkout contact-btn-submit"
-                    style={{ background: '#ea580c', borderColor: '#ea580c' }}
+                    className="contact-btn-brand"
                     onClick={onNavigateToMenu}
                   >
                     Explore Menu & Order
@@ -414,302 +381,159 @@ export function ContactPage({
               </div>
             </div>
           ) : (
-            /* FEEDBACK SUBMISSION FORM */
-            <form onSubmit={handleSubmit} noValidate>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h2 className="contact-card-heading" style={{ fontSize: '1.4rem', marginBottom: '0.35rem' }}>
-                  Send Us a Message
-                </h2>
-                <p className="contact-caption" style={{ fontSize: '0.875rem' }}>
-                  We value your feedback. Guest submissions and verified customer accounts are both welcome.
-                </p>
-              </div>
-
-              {/* Authentication Status Notice */}
-              {isSignedIn ? (
-                <div
-                  className="contact-auth-notice"
-                  style={{
-                    background: 'rgba(13, 148, 136, 0.08)',
-                    border: '1px solid rgba(13, 148, 136, 0.25)',
-                    borderRadius: '8px',
-                    padding: '0.65rem 0.95rem',
-                    color: '#0f766e',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '1.25rem',
-                  }}
-                >
+            /* Submission Form */
+            <form onSubmit={handleSubmit} noValidate className="contact-form-inner">
+              {isSignedIn && (
+                <div className="contact-verified-banner">
                   <span>
-                    Submitting as verified account:{' '}
-                    <strong>{userEmail || userName || 'Customer'}</strong>
+                    Submitting as verified user: <strong>{userEmail || userName}</strong>
                   </span>
-                  <span
-                    className="contact-auth-pill"
-                    style={{
-                      background: '#0d9488',
-                      color: '#ffffff',
-                      padding: '0.15rem 0.45rem',
-                      borderRadius: '4px',
-                    }}
-                  >
-                    ✓ Verified
-                  </span>
-                </div>
-              ) : (
-                <div
-                  className="contact-auth-notice"
-                  style={{
-                    background: 'rgba(107, 114, 128, 0.06)',
-                    border: '1px solid var(--border-light, #e5e7eb)',
-                    borderRadius: '8px',
-                    padding: '0.65rem 0.95rem',
-                    fontSize: '0.825rem',
-                    color: 'var(--text-muted, #6b7280)',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  Submitting as Guest. No account creation required.
+                  <span className="contact-verified-badge">✓ Verified</span>
                 </div>
               )}
 
-              {/* Top Submit Error Banner */}
               {submitError && (
-                <div
-                  className="checkout-alert checkout-alert-error contact-caption"
-                  role="alert"
-                  style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                >
-                  <AlertTriangleIcon size={16} />
+                <div className="contact-form-alert" role="alert">
+                  <AlertTriangleIcon size={18} />
                   <span>{submitError}</span>
                 </div>
               )}
 
-              {/* Row 1: Name and Email */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '1rem',
-                  marginBottom: '1rem',
-                }}
-              >
-                <div>
-                  <label
-                    htmlFor="feedback-name"
-                    className="contact-field-label"
-                  >
-                    Your Name <span style={{ color: '#ef4444' }}>*</span>
+              {/* 2-Column Inputs Grid */}
+              <div className="contact-inputs-grid">
+                {/* Your Name */}
+                <div className="contact-field-group">
+                  <label htmlFor="contact-name" className="contact-field-label">
+                    Your Name <span className="contact-required-star">*</span>
                   </label>
                   <input
-                    id="feedback-name"
+                    id="contact-name"
                     type="text"
-                    className={`form-input contact-input-field ${fieldErrors.name ? 'input-error' : ''}`}
-                    placeholder="e.g. John Doe"
+                    className={`contact-input ${fieldErrors.name ? 'contact-input-has-error' : ''}`}
+                    placeholder="John Doe"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     maxLength={100}
-                    style={{
-                      borderColor: fieldErrors.name ? '#ef4444' : undefined,
-                    }}
                     aria-invalid={!!fieldErrors.name}
-                    aria-describedby={fieldErrors.name ? 'name-error' : undefined}
+                    aria-describedby={fieldErrors.name ? 'name-err' : undefined}
                   />
                   {fieldErrors.name && (
-                    <span id="name-error" className="contact-caption" style={{ display: 'block', color: '#ef4444', marginTop: '0.25rem' }}>
+                    <span id="name-err" className="contact-input-error-text">
                       {fieldErrors.name}
                     </span>
                   )}
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="feedback-email"
-                    className="contact-field-label"
-                  >
-                    Email Address <span style={{ color: '#ef4444' }}>*</span>
+                {/* Email Address */}
+                <div className="contact-field-group">
+                  <label htmlFor="contact-email" className="contact-field-label">
+                    Email Address <span className="contact-required-star">*</span>
                   </label>
                   <input
-                    id="feedback-email"
+                    id="contact-email"
                     type="email"
-                    className={`form-input contact-input-field ${fieldErrors.email ? 'input-error' : ''}`}
-                    placeholder="e.g. you@example.com"
+                    className={`contact-input ${fieldErrors.email ? 'contact-input-has-error' : ''}`}
+                    placeholder="you@email.com"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     maxLength={150}
-                    style={{
-                      borderColor: fieldErrors.email ? '#ef4444' : undefined,
-                    }}
                     aria-invalid={!!fieldErrors.email}
-                    aria-describedby={fieldErrors.email ? 'email-error' : undefined}
+                    aria-describedby={fieldErrors.email ? 'email-err' : undefined}
                   />
                   {fieldErrors.email && (
-                    <span id="email-error" className="contact-caption" style={{ display: 'block', color: '#ef4444', marginTop: '0.25rem' }}>
+                    <span id="email-err" className="contact-input-error-text">
                       {fieldErrors.email}
                     </span>
                   )}
                 </div>
-              </div>
 
-              {/* Row 2: Category and Optional Phone */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '1rem',
-                  marginBottom: '1rem',
-                }}
-              >
-                <div>
-                  <label
-                    htmlFor="feedback-category"
-                    className="contact-field-label"
-                  >
-                    Message Category
-                  </label>
-                  <select
-                    id="feedback-category"
-                    className="form-input form-select contact-input-field"
-                    value={formData.category}
-                    onChange={(e) => handleInputChange('category', e.target.value)}
-                  >
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="feedback-phone"
-                    className="contact-field-label"
-                  >
-                    Phone Number <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400 }}>(Optional)</span>
+                {/* Phone Number */}
+                <div className="contact-field-group">
+                  <label htmlFor="contact-phone" className="contact-field-label">
+                    Phone Number
                   </label>
                   <input
-                    id="feedback-phone"
+                    id="contact-phone"
                     type="tel"
-                    className={`form-input contact-input-field ${fieldErrors.phone ? 'input-error' : ''}`}
-                    placeholder="e.g. +252-61xxxxxxx"
+                    className={`contact-input ${fieldErrors.phone ? 'contact-input-has-error' : ''}`}
+                    placeholder="+1 (800) 000-0000"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     maxLength={30}
-                    style={{
-                      borderColor: fieldErrors.phone ? '#ef4444' : undefined,
-                    }}
                   />
                   {fieldErrors.phone && (
-                    <span className="contact-caption" style={{ display: 'block', color: '#ef4444', marginTop: '0.25rem' }}>
+                    <span className="contact-input-error-text">
                       {fieldErrors.phone}
                     </span>
                   )}
                 </div>
-              </div>
 
-              {/* Row 3: Subject */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label
-                  htmlFor="feedback-subject"
-                  className="contact-field-label"
-                >
-                  Subject / Topic <span style={{ color: '#ef4444' }}>*</span>
-                </label>
-                <input
-                  id="feedback-subject"
-                  type="text"
-                  className={`form-input contact-input-field ${fieldErrors.subject ? 'input-error' : ''}`}
-                  placeholder="e.g. Question about allergy precautions or catering"
-                  value={formData.subject}
-                  onChange={(e) => handleInputChange('subject', e.target.value)}
-                  maxLength={150}
-                  style={{
-                    borderColor: fieldErrors.subject ? '#ef4444' : undefined,
-                  }}
-                  aria-invalid={!!fieldErrors.subject}
-                  aria-describedby={fieldErrors.subject ? 'subject-error' : undefined}
-                />
-                {fieldErrors.subject && (
-                  <span id="subject-error" className="contact-caption" style={{ display: 'block', color: '#ef4444', marginTop: '0.25rem' }}>
-                    {fieldErrors.subject}
-                  </span>
-                )}
-              </div>
-
-              {/* Row 4: Message Textarea */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                  <label
-                    htmlFor="feedback-message"
-                    className="contact-field-label"
-                    style={{ marginBottom: 0 }}
-                  >
-                    Your Message <span style={{ color: '#ef4444' }}>*</span>
+                {/* Subject */}
+                <div className="contact-field-group">
+                  <label htmlFor="contact-subject" className="contact-field-label">
+                    Subject <span className="contact-required-star">*</span>
                   </label>
-                  <span
-                    className="contact-caption"
-                    style={{
-                      fontSize: '0.75rem',
-                      color: formData.message.length > 1900 ? '#ef4444' : 'var(--text-muted)',
-                    }}
-                  >
+                  <div className="contact-select-wrap">
+                    <select
+                      id="contact-subject"
+                      className="contact-select"
+                      value={formData.category}
+                      onChange={(e) => handleInputChange('category', e.target.value)}
+                    >
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="contact-select-arrow" aria-hidden="true">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Message */}
+              <div className="contact-field-group contact-message-group">
+                <div className="contact-message-header">
+                  <label htmlFor="contact-message" className="contact-field-label">
+                    Message <span className="contact-required-star">*</span>
+                  </label>
+                  <span className="contact-char-count">
                     {formData.message.length} / 2,000
                   </span>
                 </div>
                 <textarea
-                  id="feedback-message"
-                  className={`form-input form-textarea contact-input-field ${fieldErrors.message ? 'input-error' : ''}`}
+                  id="contact-message"
+                  className={`contact-textarea ${fieldErrors.message ? 'contact-input-has-error' : ''}`}
                   rows={5}
-                  placeholder="Tell us about your experience, share feedback, or ask a question..."
+                  placeholder="Write your message here.."
                   value={formData.message}
                   onChange={(e) => handleInputChange('message', e.target.value)}
                   maxLength={2000}
-                  style={{
-                    resize: 'vertical',
-                    minHeight: '110px',
-                    lineHeight: 1.5,
-                    borderColor: fieldErrors.message ? '#ef4444' : undefined,
-                  }}
                   aria-invalid={!!fieldErrors.message}
-                  aria-describedby={fieldErrors.message ? 'message-error' : undefined}
+                  aria-describedby={fieldErrors.message ? 'message-err' : undefined}
                 />
-                {fieldErrors.message ? (
-                  <span id="message-error" className="contact-caption" style={{ display: 'block', color: '#ef4444', marginTop: '0.25rem' }}>
+                {fieldErrors.message && (
+                  <span id="message-err" className="contact-input-error-text">
                     {fieldErrors.message}
-                  </span>
-                ) : (
-                  <span className="contact-caption" style={{ display: 'block', marginTop: '0.25rem' }}>
-                    Please include order reference numbers or details if asking about a specific delivery.
                   </span>
                 )}
               </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className="btn-action btn-checkout contact-btn-submit"
-                disabled={isSubmitting}
-                style={{
-                  width: '100%',
-                  padding: '0.85rem 1.5rem',
-                  fontSize: '1rem',
-                  borderRadius: '10px',
-                  background: isSubmitting ? '#9ca3af' : '#ea580c',
-                  borderColor: isSubmitting ? '#9ca3af' : '#ea580c',
-                  color: '#ffffff',
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)',
-                }}
-              >
-                <MessageSquareIcon size={18} />
-                <span>{isSubmitting ? 'Sending Message...' : 'Submit Feedback & Message'}</span>
-              </button>
+              {/* Submit Button (Pill button aligned left with paper plane icon) */}
+              <div className="contact-submit-row">
+                <button
+                  type="submit"
+                  className="contact-send-btn"
+                  disabled={isSubmitting}
+                >
+                  <SendPlaneIcon size={16} />
+                  <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
+                </button>
+              </div>
             </form>
           )}
         </div>

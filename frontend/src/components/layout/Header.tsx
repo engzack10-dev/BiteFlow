@@ -157,7 +157,15 @@ export function Header({
             >
               My Account
             </span>
-            <UserButton />
+            <UserButton
+              appearance={{
+                elements: {
+                  footer: { display: 'none' },
+                  footerAction: { display: 'none' },
+                  userButtonPopoverFooter: { display: 'none' },
+                },
+              }}
+            />
           </div>
         </Show>
         <Show when="signed-out">
