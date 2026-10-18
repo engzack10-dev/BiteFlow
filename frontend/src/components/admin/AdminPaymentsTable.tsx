@@ -110,7 +110,7 @@ export function AdminPaymentsTable({
                 <th style={{ width: '110px', minWidth: '110px' }}>Amount ($)</th>
                 <th style={{ width: '130px', minWidth: '130px' }}>Payment Status</th>
                 <th style={{ width: '170px', minWidth: '170px' }}>Submitted</th>
-                <th style={{ width: '170px', minWidth: '170px', textAlign: 'right' }}>Actions</th>
+                <th style={{ width: '275px', minWidth: '275px', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -164,31 +164,29 @@ export function AdminPaymentsTable({
                     <td className="table-timestamp">
                       {p.submittedAt ? new Date(p.submittedAt).toLocaleString() : 'N/A'}
                     </td>
-                    <td style={{ textAlign: 'right', width: '170px', minWidth: '170px' }}>
-                      <div className="payment-actions-stack">
+                    <td style={{ textAlign: 'right', width: '275px', minWidth: '275px' }}>
+                      <div className="payment-actions-row">
                         {isPending ? (
                           <>
-                            <div className="payment-actions-top-row">
-                              <button
-                                type="button"
-                                className="btn-table-action btn-verify-action"
-                                title="Verify this payment receipt"
-                                onClick={() => onVerifyPayment(p)}
-                              >
-                                ✓ Verify
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-table-action btn-reject-action"
-                                title="Reject this payment"
-                                onClick={() => onRejectPayment(p)}
-                              >
-                                ✕ Reject
-                              </button>
-                            </div>
                             <button
                               type="button"
-                              className="btn-table-action btn-details-action btn-audit-full"
+                              className="btn-table-action btn-verify-action"
+                              title="Verify this payment receipt"
+                              onClick={() => onVerifyPayment(p)}
+                            >
+                              ✓ Verify
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-table-action btn-reject-action"
+                              title="Reject this payment"
+                              onClick={() => onRejectPayment(p)}
+                            >
+                              ✕ Reject
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-table-action btn-details-action"
                               title="View complete audit trail & details"
                               onClick={() => onViewAudit(p)}
                             >
@@ -198,7 +196,7 @@ export function AdminPaymentsTable({
                         ) : (
                           <button
                             type="button"
-                            className="btn-table-action btn-details-action btn-audit-full"
+                            className="btn-table-action btn-details-action"
                             title="View complete audit trail & details"
                             onClick={() => onViewAudit(p)}
                           >
