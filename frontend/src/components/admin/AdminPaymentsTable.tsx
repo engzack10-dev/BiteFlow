@@ -173,35 +173,46 @@ export function AdminPaymentsTable({
                       {p.submittedAt ? new Date(p.submittedAt).toLocaleString() : 'N/A'}
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <div className="table-actions-group" style={{ justifyContent: 'flex-end', gap: '0.4rem' }}>
-                        {isPending && (
+                      <div className="payment-actions-stack">
+                        {isPending ? (
                           <>
+                            <div className="payment-actions-top-row">
+                              <button
+                                type="button"
+                                className="btn-table-action btn-verify-action"
+                                title="Verify this payment receipt"
+                                onClick={() => onVerifyPayment(p)}
+                              >
+                                ✓ Verify
+                              </button>
+                              <button
+                                type="button"
+                                className="btn-table-action btn-reject-action"
+                                title="Reject this payment"
+                                onClick={() => onRejectPayment(p)}
+                              >
+                                ✕ Reject
+                              </button>
+                            </div>
                             <button
                               type="button"
-                              className="btn-table-action btn-verify-action"
-                              title="Verify this payment receipt"
-                              onClick={() => onVerifyPayment(p)}
+                              className="btn-table-action btn-details-action btn-audit-full"
+                              title="View complete audit trail & details"
+                              onClick={() => onViewAudit(p)}
                             >
-                              ✓ Verify
-                            </button>
-                            <button
-                              type="button"
-                              className="btn-table-action btn-reject-action"
-                              title="Reject this payment"
-                              onClick={() => onRejectPayment(p)}
-                            >
-                              ✕ Reject
+                              Audit Details
                             </button>
                           </>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn-table-action btn-details-action"
+                            title="View complete audit trail & details"
+                            onClick={() => onViewAudit(p)}
+                          >
+                            Audit Details
+                          </button>
                         )}
-                        <button
-                          type="button"
-                          className="btn-table-action btn-details-action"
-                          title="View complete audit trail & details"
-                          onClick={() => onViewAudit(p)}
-                        >
-                          Audit Details
-                        </button>
                       </div>
                     </td>
                   </tr>

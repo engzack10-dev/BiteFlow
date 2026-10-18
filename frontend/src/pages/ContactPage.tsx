@@ -43,49 +43,13 @@ interface FieldErrors {
   message?: string
 }
 
-/* SVG Icons matching reference design */
-function MapPinIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  )
-}
-
-function PhoneCallIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-    </svg>
-  )
-}
-
-function EnvelopeIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect width="20" height="16" x="2" y="4" rx="2" />
-      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-    </svg>
-  )
-}
-
-function ClockCircleIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
-  )
-}
-
-function SendPlaneIcon({ size = 18 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-    </svg>
-  )
-}
+import {
+  PlaceholderLocationIcon,
+  PlaceholderPhoneIcon,
+  PlaceholderMailIcon,
+  PlaceholderClockIcon,
+  PlaceholderSendIcon,
+} from '../components/common/PlaceholderIcons.js'
 
 export function ContactPage({
   isSignedIn = false,
@@ -265,7 +229,7 @@ export function ContactPage({
               {/* Address */}
               <div className="contact-detail-item">
                 <div className="contact-detail-icon-box">
-                  <MapPinIcon size={19} />
+                  <PlaceholderLocationIcon size={19} />
                 </div>
                 <div className="contact-detail-content">
                   <span className="contact-detail-label">ADDRESS</span>
@@ -278,7 +242,7 @@ export function ContactPage({
               {/* Phone */}
               <div className="contact-detail-item">
                 <div className="contact-detail-icon-box">
-                  <PhoneCallIcon size={19} />
+                  <PlaceholderPhoneIcon size={19} />
                 </div>
                 <div className="contact-detail-content">
                   <span className="contact-detail-label">PHONE</span>
@@ -291,7 +255,7 @@ export function ContactPage({
               {/* Email */}
               <div className="contact-detail-item">
                 <div className="contact-detail-icon-box">
-                  <EnvelopeIcon size={19} />
+                  <PlaceholderMailIcon size={19} />
                 </div>
                 <div className="contact-detail-content">
                   <span className="contact-detail-label">EMAIL</span>
@@ -304,7 +268,7 @@ export function ContactPage({
               {/* Working Hours */}
               <div className="contact-detail-item">
                 <div className="contact-detail-icon-box">
-                  <ClockCircleIcon size={19} />
+                  <PlaceholderClockIcon size={19} />
                 </div>
                 <div className="contact-detail-content">
                   <span className="contact-detail-label">WORKING HOURS</span>
@@ -530,7 +494,7 @@ export function ContactPage({
                   className="contact-send-btn"
                   disabled={isSubmitting}
                 >
-                  <SendPlaneIcon size={16} />
+                  <PlaceholderSendIcon size={16} />
                   <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
                 </button>
               </div>

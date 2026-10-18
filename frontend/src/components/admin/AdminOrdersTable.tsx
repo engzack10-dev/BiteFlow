@@ -15,7 +15,7 @@ interface AdminOrdersTableProps {
   orders: OrderRecord[]
   counts?: AdminOrdersResponse['counts']
   isLoading: boolean
-  onUpdateStatus: (orderId: string, nextStatus: OrderStatus, note?: string) => Promise<void>
+  onUpdateStatus?: (orderId: string, nextStatus: OrderStatus, note?: string) => Promise<void>
   onInspectOrder: (order: OrderRecord) => void
   onRefresh: (filters?: { status?: string; startDate?: string; endDate?: string; search?: string }) => void
 }
@@ -24,7 +24,6 @@ export function AdminOrdersTable({
   orders,
   counts,
   isLoading,
-  onUpdateStatus,
   onInspectOrder,
   onRefresh,
 }: AdminOrdersTableProps) {
@@ -33,7 +32,6 @@ export function AdminOrdersTable({
   const [endDate, setEndDate] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [dateError, setDateError] = useState<string | null>(null)
-  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null)
 
   const handleApplyFilters = () => {
     setDateError(null)
@@ -68,74 +66,6 @@ export function AdminOrdersTable({
       endDate: endDate || undefined,
       search: searchQuery.trim() || undefined,
     })
-  }
-
-  const handleQuickNextAction = async (order: OrderRecord) => {
-    const orderId = order.id || order._id || order.orderNumber
-    let nextStatus: OrderStatus | null = null
-
-    if (order.status === 'CONFIRMED') {
-      nextStatus = 'PREPARING'
-    } else if (order.status === 'PREPARING') {
-      nextStatus = 'READY'
-    } else if (order.status === 'READY') {
-      nextStatus = 'DISPATCHED'
-    } else if (order.status === 'DISPATCHED') {
-      nextStatus = 'DELIVERED'
-    }
-
-    if (!nextStatus) return
-
-    setUpdatingOrderId(orderId)
-    try {
-      await onUpdateStatus(orderId, nextStatus)
-    } finally {
-      setUpdatingOrderId(null)
-    }
-  }
-
-  // Get next action label & button style
-  const getActionInfo = (order: OrderRecord) => {
-    if (order.status === 'PENDING_PAYMENT') {
-      return {
-        label: 'Awaiting Payment',
-        disabled: true,
-        className: 'btn-table-action btn-pending-action',
-      }
-    }
-    if (order.status === 'CONFIRMED') {
-      return {
-        label: 'Start Prep',
-        disabled: false,
-        className: 'btn-table-action btn-prep-action',
-      }
-    }
-    if (order.status === 'PREPARING') {
-      return {
-        label: 'Mark Ready',
-        disabled: false,
-        className: 'btn-table-action btn-ready-action',
-      }
-    }
-    if (order.status === 'READY') {
-      return {
-        label: 'Dispatch',
-        disabled: false,
-        className: 'btn-table-action btn-dispatch-action',
-      }
-    }
-    if (order.status === 'DISPATCHED') {
-      return {
-        label: 'Mark Delivered',
-        disabled: false,
-        className: 'btn-table-action btn-deliver-action',
-      }
-    }
-    return {
-      label: 'Delivered',
-      disabled: true,
-      className: 'btn-table-action btn-completed-action',
-    }
   }
 
   return (
@@ -316,8 +246,7 @@ export function AdminOrdersTable({
                 <th>Order Ref</th>
                 <th>Customer</th>
                 <th>Time Placed</th>
-                <th>Items</th>
-                <th>Total ($)</th>
+                <th>Items Total ($)</th>
                 <th>Payment</th>
                 <th>Order Status</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
@@ -326,8 +255,7 @@ export function AdminOrdersTable({
             <tbody>
               {orders.map((ord) => {
                 const orderId = ord.id || ord._id || ord.orderNumber
-                const actionInfo = getActionInfo(ord)
-                const isUpdating = updatingOrderId === orderId
+                const totalItemCount = (ord.items || []).reduce((s, i) => s + (i.quantity || 0), 0)
 
                 return (
                   <tr key={orderId}>
@@ -347,70 +275,43 @@ export function AdminOrdersTable({
                     </td>
                     <td>
                       <span style={{ fontSize: '0.85rem' }}>
-                        {(ord.items || []).reduce((s, i) => s + (i.quantity || 0), 0)} items
+                        {totalItemCount} items{' '}
                       </span>
-                    </td>
-                    <td>
                       <strong style={{ color: '#16a34a', fontSize: '0.95rem' }}>
                         ${(ord.totalAmount ?? 0).toFixed(2)}
                       </strong>
                     </td>
                     <td>
-                      <span
-                        className={`status-badge ${
-                          ord.paymentStatus === 'VERIFIED'
-                            ? 'status-available'
-                            : ord.paymentStatus === 'REJECTED'
-                            ? 'status-unavailable'
-                            : 'status-pending'
-                        }`}
-                        style={{ fontSize: '0.75rem' }}
-                      >
-                        {ord.paymentStatus}
-                      </span>
+                      {ord.paymentStatus === 'PENDING' ? (
+                        <span className="order-pending-pill">
+                          PENDING
+                        </span>
+                      ) : (
+                        <span className="order-plain-status">
+                          {ord.paymentStatus}
+                        </span>
+                      )}
                     </td>
                     <td>
-                      <span
-                        className={`status-badge ${
-                          ord.status === 'DELIVERED'
-                            ? 'status-available'
-                            : ord.status === 'CONFIRMED'
-                            ? 'status-confirmed'
-                            : ord.status === 'PREPARING'
-                            ? 'status-preparing'
-                            : ord.status === 'READY'
-                            ? 'status-ready'
-                            : ord.status === 'DISPATCHED'
-                            ? 'status-dispatched'
-                            : 'status-pending'
-                        }`}
-                        style={{ fontSize: '0.75rem' }}
-                      >
-                        {ord.status}
-                      </span>
+                      {ord.status === 'PENDING_PAYMENT' ? (
+                        <span className="order-pending-pill">
+                          PENDING_PAYMENT
+                        </span>
+                      ) : (
+                        <span className="order-plain-status">
+                          {ord.status}
+                        </span>
+                      )}
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <div className="table-actions-group" style={{ justifyContent: 'flex-end', gap: '0.4rem' }}>
-                        {!actionInfo.disabled && (
-                          <button
-                            type="button"
-                            className={actionInfo.className}
-                            onClick={() => handleQuickNextAction(ord)}
-                            disabled={isUpdating}
-                            title={`Transition order to next stage`}
-                          >
-                            {isUpdating ? 'Updating...' : actionInfo.label}
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          className="btn-table-action btn-details-action"
-                          onClick={() => onInspectOrder(ord)}
-                          title="Inspect complete order details and history"
-                        >
-                          Details
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        className="btn-table-action btn-details-action"
+                        onClick={() => onInspectOrder(ord)}
+                        title="Inspect complete order details and history"
+                      >
+                        Details
+                      </button>
                     </td>
                   </tr>
                 )

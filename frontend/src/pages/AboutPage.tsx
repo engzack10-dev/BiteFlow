@@ -1,3 +1,12 @@
+import {
+  PlaceholderChefIcon,
+  PlaceholderDeliveryIcon,
+  PlaceholderBoltIcon,
+  PlaceholderQualityIcon,
+  PlaceholderSyncIcon,
+  PlaceholderShieldIcon,
+} from '../components/common/PlaceholderIcons.js'
+
 interface AboutPageProps {
   onNavigateToMenu?: () => void
   onNavigateToContact?: () => void
@@ -19,7 +28,7 @@ export function AboutPage({ onNavigateToMenu, onNavigateToContact }: AboutPagePr
         </p>
       </section>
 
-      {/* Main 2-Column Showcase (Matching Reference Design) */}
+      {/* Main 2-Column Showcase */}
       <section className="about-main-section">
         <div className="about-grid">
           {/* Left Column: Visual Showcase */}
@@ -30,7 +39,6 @@ export function AboutPage({ onNavigateToMenu, onNavigateToContact }: AboutPagePr
                 alt="BiteFlow Freshly Prepared Culinary Dish"
                 className="about-main-image"
                 onError={(e) => {
-                  // Fallback to delicious-burger or chef-pizza if needed
                   const target = e.currentTarget
                   if (!target.src.includes('delicious-burger')) {
                     target.src = '/delicious-burger.jpg'
@@ -38,7 +46,9 @@ export function AboutPage({ onNavigateToMenu, onNavigateToContact }: AboutPagePr
                 }}
               />
               <div className="about-floating-badge">
-                <span className="about-badge-icon">⚡</span>
+                <span className="about-badge-icon">
+                  <PlaceholderBoltIcon size={18} />
+                </span>
                 <div>
                   <strong>Fresh To Order</strong>
                   <span>Cloud Kitchen Fulfillment</span>
@@ -72,7 +82,9 @@ export function AboutPage({ onNavigateToMenu, onNavigateToContact }: AboutPagePr
               {/* For Restaurants */}
               <div className="about-pillar-card">
                 <div className="about-pillar-header">
-                  <div className="about-pillar-icon-box">👨‍🍳</div>
+                  <div className="about-pillar-icon-box">
+                    <PlaceholderChefIcon size={20} />
+                  </div>
                   <h3 className="about-pillar-title">How It Helps Restaurants</h3>
                 </div>
                 <ul className="about-pillar-list">
@@ -94,7 +106,9 @@ export function AboutPage({ onNavigateToMenu, onNavigateToContact }: AboutPagePr
               {/* For Customers */}
               <div className="about-pillar-card">
                 <div className="about-pillar-header">
-                  <div className="about-pillar-icon-box">🛵</div>
+                  <div className="about-pillar-icon-box">
+                    <PlaceholderDeliveryIcon size={20} />
+                  </div>
                   <h3 className="about-pillar-title">How It Helps Customers</h3>
                 </div>
                 <ul className="about-pillar-list">
@@ -142,7 +156,12 @@ export function AboutPage({ onNavigateToMenu, onNavigateToContact }: AboutPagePr
       {/* Three Core Guarantees Banner */}
       <section className="about-metrics-section">
         <div className="about-metric-card">
-          <div className="about-metric-number">01</div>
+          <div className="about-metric-top">
+            <span className="about-metric-badge-icon">
+              <PlaceholderQualityIcon size={22} />
+            </span>
+            <span className="about-metric-number">01</span>
+          </div>
           <h4 className="about-metric-title">Handcrafted Quality</h4>
           <p className="about-metric-desc">
             Artisanal ingredients, 48-hour fermented pizza dough, and hand-smashed patties prepared to perfection.
@@ -150,7 +169,12 @@ export function AboutPage({ onNavigateToMenu, onNavigateToContact }: AboutPagePr
         </div>
 
         <div className="about-metric-card">
-          <div className="about-metric-number">02</div>
+          <div className="about-metric-top">
+            <span className="about-metric-badge-icon">
+              <PlaceholderSyncIcon size={22} />
+            </span>
+            <span className="about-metric-number">02</span>
+          </div>
           <h4 className="about-metric-title">Zero Operational Lag</h4>
           <p className="about-metric-desc">
             Real-time web socket sync ensures kitchen staff and couriers receive updates with sub-second latency.
@@ -158,7 +182,12 @@ export function AboutPage({ onNavigateToMenu, onNavigateToContact }: AboutPagePr
         </div>
 
         <div className="about-metric-card">
-          <div className="about-metric-number">03</div>
+          <div className="about-metric-top">
+            <span className="about-metric-badge-icon">
+              <PlaceholderShieldIcon size={22} />
+            </span>
+            <span className="about-metric-number">03</span>
+          </div>
           <h4 className="about-metric-title">Verified Trust &amp; Safety</h4>
           <p className="about-metric-desc">
             Robust security, clerk-authenticated admin boundaries, and certified payment verification on every transaction.

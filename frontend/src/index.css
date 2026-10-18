@@ -3927,48 +3927,108 @@ button {
   background: #16a34a;
   color: #ffffff;
   border: 1px solid #15803d;
-  font-weight: 600;
+  font-family: var(--font-nav);
+  font-weight: 700;
   font-size: 0.8rem;
-  padding: 0.35rem 0.7rem;
-  border-radius: 5px;
+  padding: 0.32rem 0.65rem;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .btn-verify-action:hover {
   background: #15803d;
+  border-color: #166534;
 }
 
 .btn-reject-action {
   background: #dc2626;
   color: #ffffff;
   border: 1px solid #b91c1c;
-  font-weight: 600;
+  font-family: var(--font-nav);
+  font-weight: 700;
   font-size: 0.8rem;
-  padding: 0.35rem 0.7rem;
-  border-radius: 5px;
+  padding: 0.32rem 0.65rem;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .btn-reject-action:hover {
   background: #b91c1c;
+  border-color: #991b1b;
 }
 
 .btn-details-action {
-  background: #4b5563;
+  background: #334155;
   color: #ffffff;
-  border: 1px solid #374151;
-  font-weight: 600;
+  border: 1px solid #334155;
+  font-family: var(--font-nav);
+  font-weight: 700;
   font-size: 0.8rem;
-  padding: 0.35rem 0.7rem;
-  border-radius: 5px;
+  padding: 0.32rem 0.75rem;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-details-action:hover {
-  background: #374151;
+  background: #1e293b;
+  border-color: #1e293b;
+}
+
+.payment-actions-stack {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  align-items: flex-end;
+}
+
+.payment-actions-top-row {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.btn-audit-full {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.order-pending-pill {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  font-family: var(--font-nav);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  display: inline-block;
+  letter-spacing: 0.02em;
+}
+
+[data-theme="dark"] .order-pending-pill {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.order-plain-status {
+  font-family: var(--font-nav);
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: var(--text-dark);
 }
 
 .audit-summary-box {
@@ -6191,13 +6251,31 @@ button {
   border-color: rgba(234, 88, 12, 0.3);
 }
 
+.about-metric-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.about-metric-badge-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(234, 88, 12, 0.12);
+  color: #ea580c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .about-metric-number {
   font-family: var(--font-nav);
-  font-size: 2rem;
+  font-size: 1.85rem;
   font-weight: 800;
   color: #ea580c;
   line-height: 1;
-  margin-bottom: 0.75rem;
   opacity: 0.85;
 }
 
