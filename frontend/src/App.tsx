@@ -42,6 +42,7 @@ import { CartPage } from './pages/CartPage.js'
 import { AdminPage } from './pages/AdminPage.js'
 import { CustomerOrdersPage } from './components/orders/CustomerOrdersPage.js'
 import { ContactPage } from './pages/ContactPage.js'
+import { AboutPage } from './pages/AboutPage.js'
 import type { AdminSubTab } from './components/admin/AdminTabNav.js'
 
 export default function App() {
@@ -759,26 +760,10 @@ export default function App() {
             />
           </div>
         ) : activeTab === 'about' ? (
-          <div className="storefront-page">
-            <div style={{ maxWidth: '960px', margin: '3rem auto', padding: '0 1.5rem', textAlign: 'center' }}>
-              <h2 className="menu-script-heading" style={{ marginBottom: '1rem' }}>About BiteFlow</h2>
-              <p style={{ color: '#4b5563', fontSize: '1.1rem', lineHeight: 1.8, marginBottom: '2rem' }}>
-                We believe exceptional food brings people together. Our kitchen crafts every burger patty by hand,
-                ferments our pizza dough for 48 hours, and sources only fresh, high-quality ingredients.
-                Fast service meets restaurant-grade taste right at your doorstep.
-              </p>
-            </div>
-            <StorefrontPage
-              categories={categories}
-              products={products}
-              isLoadingMenu={isLoadingMenu}
-              menuError={menuError}
-              refreshMenu={refreshMenu}
-              onAddToCart={addProductToCart}
-              onNavigateToMenu={() => handleTabChange('menu')}
-              showHero={false}
-            />
-          </div>
+          <AboutPage
+            onNavigateToMenu={() => handleTabChange('menu')}
+            onNavigateToContact={() => handleTabChange('contact')}
+          />
         ) : activeTab === 'contact' ? (
           <ContactPage
             key={user?.id || 'guest'}
@@ -804,7 +789,7 @@ export default function App() {
       </main>
 
       {/* Site Footer */}
-      <Footer settings={restaurantSettings} />
+      <Footer settings={restaurantSettings} onNavigateToTab={handleTabChange} />
 
       {/* Toast Notification */}
       <Toast message={toastMessage} />
