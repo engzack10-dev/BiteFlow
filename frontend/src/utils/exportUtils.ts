@@ -187,7 +187,7 @@ export function exportToPrintablePDF<T>(config: PrintableReportConfig<T>): void 
   <style>
     @page {
       size: letter portrait;
-      margin: 14mm 12mm 14mm 12mm;
+      margin: 8mm 12mm 10mm 12mm;
     }
     * {
       box-sizing: border-box;
@@ -198,71 +198,75 @@ export function exportToPrintablePDF<T>(config: PrintableReportConfig<T>): void 
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       color: #1f2937;
       background: #ffffff;
-      line-height: 1.45;
-      font-size: 11pt;
-      padding: 10px;
+      line-height: 1.35;
+      font-size: 10pt;
+      padding: 4px;
     }
     .report-header {
       border-bottom: 2px solid #ea580c;
-      padding-bottom: 12px;
-      margin-bottom: 16px;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
     }
-    .brand-title {
-      font-size: 20pt;
-      font-weight: 800;
-      color: #ea580c;
-      letter-spacing: -0.5px;
+    .report-brand-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
-    .brand-tag {
-      font-size: 9pt;
-      color: #4b5563;
-      margin-top: 2px;
+    .report-brand-logo {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+      display: block;
     }
     .report-title-box {
-      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
     .report-main-title {
-      font-size: 15pt;
+      font-size: 13pt;
       font-weight: 700;
       color: #111827;
+      line-height: 1.2;
     }
     .report-sub {
-      font-size: 9.5pt;
+      font-size: 8.5pt;
       color: #6b7280;
     }
     .header-meta {
       text-align: right;
-      font-size: 8.5pt;
+      font-size: 8pt;
       color: #6b7280;
+      line-height: 1.4;
     }
     .metadata-strip {
       display: flex;
       flex-wrap: wrap;
-      gap: 16px;
+      gap: 12px;
       background: #f9fafb;
       border: 1px solid #e5e7eb;
       border-radius: 6px;
-      padding: 8px 12px;
-      margin-bottom: 16px;
-      font-size: 9pt;
+      padding: 6px 10px;
+      margin-bottom: 10px;
+      font-size: 8.5pt;
     }
     .meta-item strong {
       color: #374151;
     }
     .summary-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 12px;
-      margin-bottom: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
     }
     .summary-card {
       background: #f9fafb;
       border: 1px solid #e5e7eb;
       border-radius: 6px;
-      padding: 10px 12px;
+      padding: 6px 10px;
       text-align: left;
     }
     .summary-card.card-highlight {
@@ -270,16 +274,18 @@ export function exportToPrintablePDF<T>(config: PrintableReportConfig<T>): void 
       border-color: #fdba74;
     }
     .summary-label {
-      font-size: 8pt;
+      font-size: 7.5pt;
       text-transform: uppercase;
-      font-weight: 600;
+      font-weight: 700;
       color: #6b7280;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
+      letter-spacing: 0.3px;
     }
     .summary-value {
-      font-size: 14pt;
+      font-size: 12pt;
       font-weight: 800;
       color: #111827;
+      line-height: 1.1;
     }
     .summary-card.card-highlight .summary-value {
       color: #c2410c;
@@ -287,8 +293,8 @@ export function exportToPrintablePDF<T>(config: PrintableReportConfig<T>): void 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 8px;
-      font-size: 9.5pt;
+      margin-top: 6px;
+      font-size: 8.5pt;
     }
     thead {
       display: table-header-group;
@@ -301,28 +307,28 @@ export function exportToPrintablePDF<T>(config: PrintableReportConfig<T>): void 
       color: #1f2937;
       font-weight: 700;
       text-align: left;
-      padding: 8px 10px;
+      padding: 6px 8px;
       border: 1px solid #d1d5db;
-      font-size: 8.5pt;
+      font-size: 8pt;
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
     td {
-      padding: 7px 10px;
+      padding: 5px 8px;
       border: 1px solid #e5e7eb;
       color: #374151;
-      vertical-align: top;
+      vertical-align: middle;
     }
     tbody tr:nth-child(even) {
       background: #fafafa;
     }
     .report-footer {
-      margin-top: 24px;
-      padding-top: 10px;
+      margin-top: 14px;
+      padding-top: 6px;
       border-top: 1px solid #e5e7eb;
       display: flex;
       justify-content: space-between;
-      font-size: 8pt;
+      font-size: 7.5pt;
       color: #9ca3af;
     }
     @media print {
@@ -337,9 +343,8 @@ export function exportToPrintablePDF<T>(config: PrintableReportConfig<T>): void 
 </head>
 <body>
   <div class="report-header">
-    <div>
-      <div class="brand-title">BiteFlow</div>
-      <div class="brand-tag">Restaurant Management & Operations</div>
+    <div class="report-brand-box">
+      <img src="${window.location.origin}/Bitelogo.png" alt="BiteFlow Logo" class="report-brand-logo" />
       <div class="report-title-box">
         <h1 class="report-main-title">${escapeHtml(title)}</h1>
         <div class="report-sub">${escapeHtml(subtitle)}</div>
@@ -370,7 +375,7 @@ export function exportToPrintablePDF<T>(config: PrintableReportConfig<T>): void 
       setTimeout(function() {
         window.focus();
         window.print();
-      }, 250);
+      }, 350);
     };
   </script>
 </body>

@@ -243,13 +243,13 @@ export function AdminOrdersTable({
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Order Ref</th>
-                <th>Customer</th>
-                <th>Time Placed</th>
-                <th>Items Total ($)</th>
-                <th>Payment</th>
-                <th>Order Status</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th style={{ width: '160px', minWidth: '160px' }}>Order Ref</th>
+                <th style={{ minWidth: '180px' }}>Customer</th>
+                <th style={{ width: '170px', minWidth: '170px' }}>Time Placed</th>
+                <th style={{ width: '150px', minWidth: '150px' }}>Items Total ($)</th>
+                <th style={{ width: '120px', minWidth: '120px' }}>Payment</th>
+                <th style={{ width: '170px', minWidth: '170px' }}>Order Status</th>
+                <th style={{ width: '110px', minWidth: '110px', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -260,24 +260,24 @@ export function AdminOrdersTable({
                 return (
                   <tr key={orderId}>
                     <td>
-                      <span className="payment-ref-code">{ord.orderNumber}</span>
+                      <span className="payment-ref-code table-order-ref">{ord.orderNumber}</span>
                     </td>
                     <td>
-                      <div>
-                        <strong>{ord.customerName}</strong>
+                      <div className="table-customer-name">
+                        {ord.customerName}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                      <div className="table-customer-phone">
                         {ord.customerPhone}
                       </div>
                     </td>
-                    <td style={{ fontSize: '0.8rem', color: '#6b7280' }}>
+                    <td className="table-timestamp">
                       {ord.createdAt ? new Date(ord.createdAt).toLocaleString() : 'N/A'}
                     </td>
-                    <td>
-                      <span style={{ fontSize: '0.85rem' }}>
+                    <td className="table-amount-cell">
+                      <span className="table-items-count">
                         {totalItemCount} items{' '}
                       </span>
-                      <strong style={{ color: '#16a34a', fontSize: '0.95rem' }}>
+                      <strong className="table-amount">
                         ${(ord.totalAmount ?? 0).toFixed(2)}
                       </strong>
                     </td>
@@ -303,7 +303,7 @@ export function AdminOrdersTable({
                         </span>
                       )}
                     </td>
-                    <td style={{ textAlign: 'right' }}>
+                    <td style={{ textAlign: 'right', width: '110px', minWidth: '110px' }}>
                       <button
                         type="button"
                         className="btn-table-action btn-details-action"

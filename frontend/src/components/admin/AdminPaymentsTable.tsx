@@ -104,13 +104,13 @@ export function AdminPaymentsTable({
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Payment Ref</th>
-                <th>Order Ref</th>
-                <th>Customer</th>
-                <th>Amount ($)</th>
-                <th>Payment Status</th>
-                <th>Submitted</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th style={{ width: '160px', minWidth: '160px' }}>Payment Ref</th>
+                <th style={{ width: '160px', minWidth: '160px' }}>Order Ref</th>
+                <th style={{ minWidth: '180px' }}>Customer</th>
+                <th style={{ width: '110px', minWidth: '110px' }}>Amount ($)</th>
+                <th style={{ width: '130px', minWidth: '130px' }}>Payment Status</th>
+                <th style={{ width: '170px', minWidth: '170px' }}>Submitted</th>
+                <th style={{ width: '170px', minWidth: '170px', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -125,18 +125,18 @@ export function AdminPaymentsTable({
                       <span className="payment-ref-code">{p.paymentNumber}</span>
                     </td>
                     <td>
-                      <strong>{p.orderNumber}</strong>
+                      <span className="payment-ref-code table-order-ref">{p.orderNumber}</span>
                     </td>
                     <td>
-                      <div>{p.customerName}</div>
+                      <div className="table-customer-name">{p.customerName}</div>
                       {p.customerEmail && (
-                        <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                        <div className="table-customer-email">
                           {p.customerEmail}
                         </div>
                       )}
                     </td>
                     <td>
-                      <span style={{ fontSize: '1rem', fontWeight: 700, color: '#16a34a' }}>
+                      <span className="table-amount">
                         ${p.amount.toFixed(2)}
                       </span>
                     </td>
@@ -154,25 +154,17 @@ export function AdminPaymentsTable({
                       </span>
                       {isRejected && p.rejectionReason && (
                         <div
-                          style={{
-                            fontSize: '0.75rem',
-                            color: '#b91c1c',
-                            marginTop: '0.2rem',
-                            maxWidth: '180px',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}
+                          className="table-rejection-reason"
                           title={p.rejectionReason}
                         >
                           Reason: {p.rejectionReason}
                         </div>
                       )}
                     </td>
-                    <td style={{ fontSize: '0.8rem', color: '#6b7280' }}>
+                    <td className="table-timestamp">
                       {p.submittedAt ? new Date(p.submittedAt).toLocaleString() : 'N/A'}
                     </td>
-                    <td style={{ textAlign: 'right' }}>
+                    <td style={{ textAlign: 'right', width: '170px', minWidth: '170px' }}>
                       <div className="payment-actions-stack">
                         {isPending ? (
                           <>
@@ -206,7 +198,7 @@ export function AdminPaymentsTable({
                         ) : (
                           <button
                             type="button"
-                            className="btn-table-action btn-details-action"
+                            className="btn-table-action btn-details-action btn-audit-full"
                             title="View complete audit trail & details"
                             onClick={() => onViewAudit(p)}
                           >
